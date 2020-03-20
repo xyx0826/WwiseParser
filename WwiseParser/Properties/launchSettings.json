@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WwiseParser": {
+      "commandName": "Project",
+      "commandLineArgs": "0248_00001426.355c.bnk -ns"
+    }
+  }
+}
