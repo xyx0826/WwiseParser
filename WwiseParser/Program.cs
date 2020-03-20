@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using WwiseParserLib.Structures;
 using WwiseParserLib.Structures.Sections;
