@@ -23,12 +23,12 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <summary>
         /// <para>The count of children Music Tracks of the Music Switch Container.</para>
         /// </summary>
-        public uint ChildCount { get; set; }
+        public uint TrackCount { get; set; }
 
         /// <summary>
         /// <para>IDs of children Music Tracks of the Music Switch Container.</para>
         /// </summary>
-        public uint[] ChildIds { get; set; }
+        public uint[] TrackIds { get; set; }
 
         /// <summary>
         /// <para>The music grid duration of the Music Switch Container, in milliseconds.</para>
@@ -175,6 +175,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         /// <summary>
         /// <para>The key point at which the source exits.</para>
+        /// <para><see cref="MusicPlaylistContainer"/> uses <see cref="MusicKeyPointUInt"/>.</para>
         /// <para>Located at: Music Switch Container Property Editor > Transitions > Source > Exit source at</para>
         /// </summary>
         public MusicKeyPointByte ExitSourceAt { get; set; }
@@ -299,6 +300,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <summary>
         /// <para>Whether to play the pre-entry section of the transition segment.</para>
         /// <para>A value of 0xFF converts to true.</para>
+        /// <para>Only exists when <see cref="UseTransitionSegment"/>.</para>
         /// <para>Located at: Music Switch Container Property Editor > Transitions > Transition Segment > Play transition pre-entry</para>
         /// </summary>
         public bool PlayTransitionPreEntry { get; set; }
@@ -306,6 +308,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <summary>
         /// <para>Whether to play the post-exit section of the transition segment.</para>
         /// <para>A value of 0xFF converts to true.</para>
+        /// <para>Only exists when <see cref="UseTransitionSegment"/>.</para>
         /// <para>Located at: Music Switch Container Property Editor > Transitions > Transition Segment > Play transition post-exit</para>
         /// </summary>
         public bool PlayTransitionPostExit { get; set; }
