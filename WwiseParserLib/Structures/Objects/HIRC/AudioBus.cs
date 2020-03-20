@@ -208,7 +208,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         Auro9_1 = 0x2D60F10A,
         Auro10_1 = 0x2DE0F10B,
         Auro11_1 = 0x2FE0F10C,
-        AUro13_1 = 0x2FE3F10E
+        Auro13_1 = 0x2FE3F10E
     }
 
     public enum AudioBusHdrReleaseMode : byte
