@@ -52,7 +52,7 @@ namespace WwiseParserLib.Parsers.HIRC
                             break;
 
                         case HIRCObjectType.AudioBus:
-                            hircObject = ParseAudioBus(objectBlob);
+                            hircObject = ParseAudioBus(objectBlob, false);
                             break;
 
                         case HIRCObjectType.BlendContainer:
@@ -79,6 +79,10 @@ namespace WwiseParserLib.Parsers.HIRC
                             hircObject = ParseMusicPlaylistContainer(objectBlob);
                             break;
 
+                        case HIRCObjectType.AuxiliaryBus:
+                            hircObject = ParseAudioBus(objectBlob, true) as AuxiliaryBus;
+                            break;
+
                         default:
                             hircObject = ParseUnknown(objectType, objectBlob);
                             break;
@@ -90,11 +94,11 @@ namespace WwiseParserLib.Parsers.HIRC
             }
         }
 
-        public static AudioBus ParseAudioBus(byte[] data)
+        public static AudioBus ParseAudioBus(byte[] data, bool auxiliary)
         {
             using (var reader = new BinaryReader(new MemoryStream(data)))
             {
-                var audioBus = new AudioBus(data.Length);
+                var audioBus = auxiliary ? new AuxiliaryBus(data.Length) : new AudioBus(data.Length);
                 audioBus.Id = reader.ReadUInt32();
                 audioBus.ParentId = reader.ReadUInt32();
                 audioBus.ParameterCount = reader.ReadByte();
