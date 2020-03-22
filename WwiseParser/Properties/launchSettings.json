@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "WwiseParser": {
-      "commandName": "Project",
-      "commandLineArgs": "012e_00000000.bin -i"
-    }
-  }
-}
