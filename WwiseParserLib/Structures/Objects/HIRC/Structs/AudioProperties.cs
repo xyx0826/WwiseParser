@@ -71,9 +71,19 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         public ValueType[] ParameterValues { get; set; }
 
         /// <summary>
-        /// Unknown byte. Seems to be always zero.
+        /// The count of unknown parameter pairs.
         /// </summary>
-        public byte Unknown_2 { get; set; }
+        public byte ParameterPairCount { get; set; }
+
+        /// <summary>
+        /// Types of unknown parameter pairs.
+        /// </summary>
+        public byte[] ParameterPairTypes { get; set; }
+
+        /// <summary>
+        /// Values of unknown parameter pairs.
+        /// </summary>
+        public AudioParameterPair[] ParameterPairValues { get; set; }
 
         /// <summary>
         /// <para>The spatial positioning behaviors of the audio object.</para>
@@ -375,6 +385,13 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         MidiClipTempoSourceIsFile,
         LoopTime_UInt = 0x3A,
         InitialDelay
+    }
+
+    public struct AudioParameterPair
+    {
+        public float Parameter_1 { get; set; }
+
+        public float Parameter_2 { get; set; }
     }
 
     [Flags]

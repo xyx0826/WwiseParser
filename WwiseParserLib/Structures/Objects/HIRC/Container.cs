@@ -34,9 +34,14 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public float TransitionDuration { get; set; }
 
         /// <summary>
-        /// Eight unknown bytes. Appears to be zero.
+        /// Unknown value.
         /// </summary>
-        public byte[] Unknown_2 { get; set; }
+        public float Unknown_2 { get; set; }
+
+        /// <summary>
+        /// Unknown value.
+        /// </summary>
+        public float Unknown_3 { get; set; }
 
         /// <summary>
         /// <para>The count of last played audio to avoid repeating.</para>
@@ -78,7 +83,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <summary>
         /// Unknown value. Appears to be zero.
         /// </summary>
-        public ushort Unknown_3 { get; set; }
+        public ushort Unknown_4 { get; set; }
     }
 
     public enum ContainerTransitionType : byte

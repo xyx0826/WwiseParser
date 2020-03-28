@@ -207,12 +207,20 @@ namespace WwiseParserLib.Parsers.HIRC
                 sound.Id = reader.ReadUInt32();
                 sound.Unknown_04 = reader.ReadByte();
                 sound.Unknown_05 = reader.ReadByte();
-                sound.Conversion = (SoundConversionType)reader.ReadByte();
-                sound.Unknown_07 = reader.ReadByte();
-                sound.Source = (SoundSource)reader.ReadByte();
-                sound.AudioId = reader.ReadUInt32();
-                sound.AudioLength = reader.ReadUInt32();
-                sound.AudioType = (SoundType)reader.ReadByte();
+                if (sound.Unknown_04 > 1)
+                {
+                    Console.WriteLine("Encountered sound object with Unknown_04 > 1. Skipping to AudioProperties.");
+                    reader.BaseStream.Seek(0x10, SeekOrigin.Current);
+                }
+                else
+                {
+                    sound.Conversion = (SoundConversionType)reader.ReadByte();
+                    sound.Unknown_07 = reader.ReadByte();
+                    sound.Source = (SoundSource)reader.ReadByte();
+                    sound.AudioId = reader.ReadUInt32();
+                    sound.AudioLength = reader.ReadUInt32();
+                    sound.AudioType = (SoundType)reader.ReadByte();
+                }
                 sound.Properties = reader.ReadAudioProperties();
                 return sound;
             }
@@ -228,7 +236,8 @@ namespace WwiseParserLib.Parsers.HIRC
                 container.LoopCount = reader.ReadUInt16();
                 container.Unknown_1 = reader.ReadUInt32();
                 container.TransitionDuration = reader.ReadSingle();
-                container.Unknown_2 = reader.ReadBytes(8);
+                container.Unknown_2 = reader.ReadSingle();
+                container.Unknown_3 = reader.ReadSingle();
                 container.AvoidLastPlayedCount = reader.ReadUInt16();
                 container.Transition = (ContainerTransitionType)reader.ReadByte();
                 container.Shuffle = reader.ReadBoolean();
@@ -240,7 +249,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 {
                     container.ChildIds[i] = reader.ReadUInt32();
                 }
-                container.Unknown_3 = reader.ReadUInt16();
+                container.Unknown_4 = reader.ReadUInt16();
 
                 return container;
             }
@@ -830,7 +839,20 @@ namespace WwiseParserLib.Parsers.HIRC
                     audioProperties.ParameterValues[i] = reader.ReadSingle();
                 }
             }
-            audioProperties.Unknown_2 = reader.ReadByte();
+            audioProperties.ParameterPairCount = reader.ReadByte();
+            audioProperties.ParameterPairTypes = new byte[audioProperties.ParameterPairCount];
+            for (var i = 0; i < audioProperties.ParameterPairCount; i++)
+            {
+                audioProperties.ParameterPairTypes[i] = reader.ReadByte();
+            }
+            audioProperties.ParameterPairValues = new AudioParameterPair[audioProperties.ParameterPairCount];
+            for (var i = 0; i < audioProperties.ParameterPairCount; i++)
+            {
+                AudioParameterPair audioParameterPair = default;
+                audioParameterPair.Parameter_1 = reader.ReadSingle();
+                audioParameterPair.Parameter_2 = reader.ReadSingle();
+                audioProperties.ParameterPairValues[i] = audioParameterPair;
+            }
             audioProperties.Positioning = (AudioPositioningBehavior)reader.ReadByte();
             if (audioProperties.Positioning.HasFlag(AudioPositioningBehavior.ThreeDimensional))
             {
