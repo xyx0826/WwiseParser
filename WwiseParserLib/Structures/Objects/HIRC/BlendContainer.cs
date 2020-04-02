@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class BlendContainer : HIRCObject
+    public class BlendContainer : HIRCObjectBase
     {
         public BlendContainer(int length) : base(HIRCObjectType.BlendContainer, (uint)length)
         {

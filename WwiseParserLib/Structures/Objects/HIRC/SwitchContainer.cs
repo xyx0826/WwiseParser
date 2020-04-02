@@ -3,7 +3,7 @@ using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class SwitchContainer : HIRCObject
+    public class SwitchContainer : HIRCObjectBase
     {
         public SwitchContainer(int length) : base(HIRCObjectType.SwitchContainer, (uint)length)
         {

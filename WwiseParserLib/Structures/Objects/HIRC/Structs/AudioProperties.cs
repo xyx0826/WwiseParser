@@ -5,7 +5,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
     /// <summary>
     /// The shared structure used by many Wwise objects in the Actor-Mixer or Interactive Music hierarchies.
     /// </summary>
-    public struct AudioProperties
+    public class AudioProperties
     {
         /// <summary>
         /// <para>Whether to override parent effects for the audio object.</para>

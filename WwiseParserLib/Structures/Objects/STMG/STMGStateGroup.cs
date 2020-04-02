@@ -1,6 +1,6 @@
 ﻿namespace WwiseParserLib.Structures.Objects.STMG
 {
-    public class STMGStateGroup : STMGObject
+    public class STMGStateGroup : STMGObjectBase
     {
         /// <summary>
         /// <para>The default transition time, in milliseconds, of the State Group.</para>

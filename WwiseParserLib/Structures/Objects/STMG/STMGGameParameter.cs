@@ -1,6 +1,6 @@
 ﻿namespace WwiseParserLib.Structures.Objects.STMG
 {
-    public class STMGGameParameter : STMGObject
+    public class STMGGameParameter : STMGObjectBase
     {
         /// <summary>
         /// <para>The default value of the Game Parameter.</para>

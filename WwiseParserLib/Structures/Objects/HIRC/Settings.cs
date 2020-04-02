@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Settings : HIRCObject
+    public class Settings : HIRCObjectBase
     {
         public Settings(int length) : base(HIRCObjectType.Settings, (uint)length)
         {

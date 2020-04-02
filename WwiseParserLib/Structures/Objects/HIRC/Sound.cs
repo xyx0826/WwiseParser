@@ -3,7 +3,7 @@ using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Sound : HIRCObject
+    public class Sound : HIRCObjectBase
     {
         public Sound(int length) : base(HIRCObjectType.Sound, (uint)length)
         {

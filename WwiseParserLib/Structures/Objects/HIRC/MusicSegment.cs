@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicSegment : HIRCObject
+    public class MusicSegment : HIRCObjectBase
     {
         public MusicSegment(int length) : base(HIRCObjectType.MusicSegment, (uint)length)
         {

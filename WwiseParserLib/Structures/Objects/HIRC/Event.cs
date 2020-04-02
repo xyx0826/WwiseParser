@@ -1,6 +1,6 @@
 ﻿namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Event : HIRCObject
+    public class Event : HIRCObjectBase
     {
         public Event(int length) : base(HIRCObjectType.Event, (uint)length)
         {

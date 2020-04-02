@@ -1,6 +1,6 @@
 ﻿namespace WwiseParserLib.Structures.Objects.STMG
 {
-    public class STMGSwitchGroup : STMGObject
+    public class STMGSwitchGroup : STMGObjectBase
     {
         /// <summary>
         /// The ID of the Game Parameter that the Switch Group is bound to.

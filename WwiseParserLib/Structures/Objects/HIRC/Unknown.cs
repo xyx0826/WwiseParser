@@ -1,6 +1,6 @@
 ﻿namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Unknown : HIRCObject
+    public class Unknown : HIRCObjectBase
     {
         public Unknown(HIRCObjectType type, int length) : base(type, (uint)length)
         {

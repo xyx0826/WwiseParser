@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicSwitchContainer : HIRCObject
+    public class MusicSwitchContainer : HIRCObjectBase
     {
         public MusicSwitchContainer(int length) : base(HIRCObjectType.MusicSwitchContainer, (uint)length)
         {
@@ -128,7 +128,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>The association paths of the Music Switch Container.</para>
         /// <para>Located at: Music Switch Container Association Editor</para>
         /// </summary>
-        public MusicPathNode Paths { get; set; }
+        public AudioPathNode Paths { get; set; }
     }
 
     public struct MusicTransition
@@ -322,7 +322,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         RandomCustomCue
     }
 
-    public class MusicPathElement
+    public class AudioPathElement
     {
         /// <summary>
         /// <para>The ID of the parent State or Switch.</para>
@@ -336,12 +336,12 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public ushort Weight { get; set; }
 
         /// <summary>
-        /// Unknown value. Appears to always be 0x64.
+        /// <para>The probability of the path element.</para>
         /// </summary>
-        public ushort Unknown_0A { get; set; }
+        public ushort Probability { get; set; }
     }
 
-    public class MusicPathNode : MusicPathElement
+    public class AudioPathNode : AudioPathElement
     {
         /// <summary>
         /// <para>The beginning position of the node's children in all nodes.</para>
@@ -357,15 +357,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <summary>
         /// <para>Children of the path node.</para>
         /// </summary>
-        public MusicPathElement[] Children { get; set; }
+        public AudioPathElement[] Children { get; set; }
     }
 
-    public class MusicPathEndpoint : MusicPathElement
+    public class MusicPathEndpoint : AudioPathElement
     {
         /// <summary>
-        /// <para>The ID of the music object to play.</para>
-        /// <para>Can only be segments that are direct children of the Music Switch Container.</para>
+        /// <para>The ID of the audio object to play.</para>
+        /// <para>For Music Switch Containers, the object must be a direct children.</para>
         /// </summary>
-        public uint SegmentId { get; set; }
+        public uint AudioId { get; set; }
     }
 }

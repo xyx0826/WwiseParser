@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class EventAction : HIRCObject
+    public class EventAction : HIRCObjectBase
     {
         public EventAction(int length) : base(HIRCObjectType.EventAction, (uint)length)
         {

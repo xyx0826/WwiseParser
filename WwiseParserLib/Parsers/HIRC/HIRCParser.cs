@@ -16,7 +16,7 @@ namespace WwiseParserLib.Parsers.HIRC
             {
                 var hircSection = new HIRCSection(blob.Length);
                 hircSection.ObjectCount = reader.ReadUInt32();
-                hircSection.Objects = new HIRCObject[hircSection.ObjectCount];
+                hircSection.Objects = new HIRCObjectBase[hircSection.ObjectCount];
                 var objects = new Dictionary<byte, int>();
                 for (var i = 0; i < hircSection.ObjectCount; i++)
                 {
@@ -24,9 +24,13 @@ namespace WwiseParserLib.Parsers.HIRC
                     var objectLength = reader.ReadUInt32();
                     var objectBlob = reader.ReadBytes((int)objectLength);
 
-                    HIRCObject hircObject;
+                    HIRCObjectBase hircObject;
                     switch ((HIRCObjectType)objectType)
                     {
+                        case HIRCObjectType.Settings:
+                            hircObject = ParseSettings(objectBlob);
+                            break;
+
                         case HIRCObjectType.Sound:
                             hircObject = ParseSound(objectBlob);
                             break;
@@ -71,12 +75,12 @@ namespace WwiseParserLib.Parsers.HIRC
                             hircObject = ParseMusicSwitchContainer(objectBlob);
                             break;
 
-                        case HIRCObjectType.Settings:
-                            hircObject = ParseSettings(objectBlob);
-                            break;
-
                         case HIRCObjectType.MusicPlaylistContainer:
                             hircObject = ParseMusicPlaylistContainer(objectBlob);
+                            break;
+
+                        case HIRCObjectType.DialogueEvent:
+                            hircObject = ParseDialogueEvent(objectBlob);
                             break;
 
                         case HIRCObjectType.AuxiliaryBus:
@@ -792,6 +796,29 @@ namespace WwiseParserLib.Parsers.HIRC
             }
         }
 
+        public static DialogueEvent ParseDialogueEvent(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var dialogueEvent = new DialogueEvent(data.Length);
+                dialogueEvent.Id = reader.ReadUInt32();
+                dialogueEvent.Probability = reader.ReadByte();
+                dialogueEvent.ArgumentCount = reader.ReadUInt32();
+                dialogueEvent.ArgumentIds = new uint[dialogueEvent.ArgumentCount];
+                for (var i = 0; i < dialogueEvent.ArgumentCount; i++)
+                {
+                    dialogueEvent.ArgumentIds[i] = reader.ReadUInt32();
+                }
+                dialogueEvent.Unknown_1 = reader.ReadByte();
+                dialogueEvent.Unknown_2 = reader.ReadByte();
+                dialogueEvent.Unknown_3 = reader.ReadByte();
+                dialogueEvent.PathSectionLength = reader.ReadUInt32();
+                dialogueEvent.UseWeighted = reader.ReadBoolean();
+                dialogueEvent.Paths = reader.ReadPaths(dialogueEvent.PathSectionLength, null);
+
+                return dialogueEvent;
+            }
+        }
 
         private static AudioProperties ReadAudioProperties(this BinaryReader reader)
         {
@@ -953,7 +980,7 @@ namespace WwiseParserLib.Parsers.HIRC
             return audioProperties;
         }
 
-        private static MusicPathNode ReadPaths(this BinaryReader reader, uint pathSectionLength, uint[] childIds)
+        private static AudioPathNode ReadPaths(this BinaryReader reader, uint pathSectionLength, uint[] audioIds)
         {
             // Assert section integrity
             if (pathSectionLength % 0x0C > 0)
@@ -971,37 +998,68 @@ namespace WwiseParserLib.Parsers.HIRC
             }
 
             // Read root node (index 0)
-            return ReadPathElement(sections, childIds, 0) as MusicPathNode;
+            return ReadPathElement(sections, audioIds, 0) as AudioPathNode;
         }
 
-        private static MusicPathElement ReadPathElement(List<byte[]> sections, uint[] childIds, uint childrenStartAt)
+        private static AudioPathElement ReadPathElement(List<byte[]> sections, uint[] audioIds, uint childrenStartAt)
         {
+            var elementIsEndpoint = false;
+            var hasAudioIds = audioIds == null;
             var section = sections[(int)childrenStartAt];
-            var childId = BitConverter.ToUInt32(section, 4);
-            if (childIds.Contains(childId))
+
+            var fromStateOrSwitchId = BitConverter.ToUInt32(section, 0);
+            var audioId = BitConverter.ToUInt32(section, 4);                // either childId...
+            var childrenStartAtIndex = BitConverter.ToUInt16(section, 4);   // or childrenStartAtIndex
+            var childCount = BitConverter.ToUInt16(section, 6);             // with childCount
+            var weight = BitConverter.ToUInt16(section, 8);
+            var probability = BitConverter.ToUInt16(section, 10);
+
+            // Figure out whether the element is a node or an endpoint
+            if (hasAudioIds)
             {
-                // childId is a Music Segment, reached the end
+                if (audioIds.Contains(audioId))
+                {
+                    // element is an endpoint
+                    elementIsEndpoint = true;
+                }
+            }
+            else if (childrenStartAtIndex < sections.Count          // Children index not out of bound
+                && childrenStartAtIndex > childrenStartAt           // Children's children start at somewhere down the road
+                && childCount < sections.Count - childrenStartAt)   // Children's children count not out of bound
+            {
+                // element is a node
+                elementIsEndpoint = false;
+            }
+            else
+            {
+                // element is an endpoint
+                elementIsEndpoint = true;
+            }
+
+            if (elementIsEndpoint)
+            {
+                // childId is an audio object, reached the end
                 var endpoint = new MusicPathEndpoint();
-                endpoint.FromStateOrSwitchId = BitConverter.ToUInt32(section, 0);
-                endpoint.SegmentId = childId;
-                endpoint.Weight = BitConverter.ToUInt16(section, 8);
-                endpoint.Unknown_0A = BitConverter.ToUInt16(section, 10);
+                endpoint.FromStateOrSwitchId = fromStateOrSwitchId;
+                endpoint.AudioId = audioId;
+                endpoint.Weight = weight;
+                endpoint.Probability = probability;
                 return endpoint;
             }
             else
             {
                 // childId is not an ID, reached a node
-                var node = new MusicPathNode();
-                node.FromStateOrSwitchId = BitConverter.ToUInt32(section, 0);
-                node.ChildrenStartAtIndex = BitConverter.ToUInt16(section, 4);
-                node.ChildCount = BitConverter.ToUInt16(section, 6);
-                node.Children = new MusicPathElement[node.ChildCount];
+                var node = new AudioPathNode();
+                node.FromStateOrSwitchId = fromStateOrSwitchId;
+                node.ChildrenStartAtIndex = childrenStartAtIndex;
+                node.ChildCount = childCount;
+                node.Children = new AudioPathElement[node.ChildCount];
                 for (uint i = 0; i < node.ChildCount; i++)
                 {
-                    node.Children[i] = ReadPathElement(sections, childIds, node.ChildrenStartAtIndex + i);
+                    node.Children[i] = ReadPathElement(sections, audioIds, node.ChildrenStartAtIndex + i);
                 }
-                node.Weight = BitConverter.ToUInt16(section, 8);
-                node.Unknown_0A = BitConverter.ToUInt16(section, 10);
+                node.Weight = weight;
+                node.Probability = probability;
                 return node;
             }
         }

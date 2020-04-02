@@ -3,7 +3,7 @@
     /// <summary>
     /// The Wwise RTPC structure used by many Wwise objects in Actor-Mixer and Interactive Music hierarchies.
     /// </summary>
-    public struct AudioRtpc
+    public class AudioRtpc
     {
         /// <summary>
         /// <para>The MIDI effect ID of the RTPC when <see cref="IsMidi"/>, otherwise Game Parameter or LFO ID on the x-axis.</para>
@@ -79,7 +79,7 @@
         DB = 0x02
     }
 
-    public struct RtpcPoint
+    public class RtpcPoint
     {
         /// <summary>
         /// <para>The x-axis coordinate of the RTPC point.</para>

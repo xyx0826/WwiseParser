@@ -3,7 +3,7 @@
     /// <summary>
     /// The base class of all STMG section Wwise object structures.
     /// </summary>
-    public class STMGObject : WwiseObject
+    public class STMGObjectBase : WwiseObjectBase
     {
         /// <summary>
         /// The ID of the object.

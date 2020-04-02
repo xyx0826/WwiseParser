@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class ActorMixer : HIRCObject
+    public class ActorMixer : HIRCObjectBase
     {
         public ActorMixer(int length) : base(HIRCObjectType.ActorMixer, (uint)length)
         {

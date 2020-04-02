@@ -17,6 +17,6 @@ namespace WwiseParserLib.Structures.Sections
         /// <summary>
         /// <para>The objects in the section.</para>
         /// </summary>
-        public HIRCObject[] Objects { get; set; }
+        public HIRCObjectBase[] Objects { get; set; }
     }
 }
