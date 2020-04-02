@@ -3,7 +3,7 @@
     /// <summary>
     /// The base class of all Wwise object structures.
     /// </summary>
-    public abstract class WwiseObject
+    public abstract class WwiseObjectBase
     {
     }
 }

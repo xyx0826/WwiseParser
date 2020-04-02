@@ -3,14 +3,14 @@
     /// <summary>
     /// The base class of all HIRC section Wwise object structures.
     /// </summary>
-    public class HIRCObject : WwiseObject
+    public class HIRCObjectBase : WwiseObjectBase
     {
-        private HIRCObject()
+        private HIRCObjectBase()
         {
 
         }
 
-        protected HIRCObject(HIRCObjectType type, uint length)
+        protected HIRCObjectBase(HIRCObjectType type, uint length)
         {
             Type = type;
             Length = length;
