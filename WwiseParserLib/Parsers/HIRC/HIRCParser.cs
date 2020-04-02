@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using WwiseParserLib.Structures.Objects.HIRC;
@@ -199,6 +200,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     audioBus.StateGroups[i] = stateGroup;
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return audioBus;
             }
         }
@@ -226,6 +228,8 @@ namespace WwiseParserLib.Parsers.HIRC
                     sound.AudioType = (SoundType)reader.ReadByte();
                 }
                 sound.Properties = reader.ReadAudioProperties();
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return sound;
             }
         }
@@ -255,6 +259,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 }
                 container.Unknown_4 = reader.ReadUInt16();
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return container;
             }
         }
@@ -273,6 +278,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     actorMixer.ChildIds[i] = reader.ReadUInt32();
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return actorMixer;
             }
         }
@@ -321,6 +327,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     switchContainer.Children[i] = switchChild;
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return switchContainer;
             }
         }
@@ -390,6 +397,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     blendContainer.BlendTracks[i] = blendTrack;
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return blendContainer;
             }
         }
@@ -444,6 +452,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     musicSegment.MusicCues[i] = musicCue;
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return musicSegment;
             }
         }
@@ -535,6 +544,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 musicSwitchContainer.UseWeighted = reader.ReadBoolean();
                 musicSwitchContainer.Paths = reader.ReadPaths(musicSwitchContainer.PathSectionLength, musicSwitchContainer.TrackIds);
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return musicSwitchContainer;
             }
         }
@@ -620,6 +630,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 }
                 musicTrack.LookAheadTime = reader.ReadUInt32();
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return musicTrack;
             }
         }
@@ -637,6 +648,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     @event.ActionIds[i] = reader.ReadUInt32();
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return @event;
             }
         }
@@ -680,6 +692,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 }
                 eventAction.Settings = settings;
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return eventAction;
             }
         }
@@ -702,6 +715,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     settings.ParameterValues[i] = reader.ReadSingle();
                 }
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return settings;
             }
         }
@@ -714,6 +728,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 unknown.Id = reader.ReadUInt32();
                 unknown.Blob = reader.ReadBytes(data.Length - 4);
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return unknown;
             }
         }
@@ -792,6 +807,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 musicPlaylistContainer.PlaylistElementCount = reader.ReadUInt32();
                 musicPlaylistContainer.Playlist = reader.ReadPlaylist();
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return musicPlaylistContainer;
             }
         }
@@ -816,6 +832,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 dialogueEvent.UseWeighted = reader.ReadBoolean();
                 dialogueEvent.Paths = reader.ReadPaths(dialogueEvent.PathSectionLength, null);
 
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return dialogueEvent;
             }
         }
