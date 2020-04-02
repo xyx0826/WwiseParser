@@ -822,7 +822,7 @@ namespace WwiseParserLib.Parsers.HIRC
 
         private static AudioProperties ReadAudioProperties(this BinaryReader reader)
         {
-            AudioProperties audioProperties = default;
+            var audioProperties = new AudioProperties();
             audioProperties.OverrideEffects = reader.ReadBoolean();
             audioProperties.EffectCount = reader.ReadByte();
             if (audioProperties.EffectCount > 0)
@@ -939,7 +939,7 @@ namespace WwiseParserLib.Parsers.HIRC
             audioProperties.StateGroups = new AudioStateGroup[audioProperties.StateGroupCount];
             for (var i = 0; i < audioProperties.StateGroupCount; i++)
             {
-                AudioStateGroup stateGroup = new AudioStateGroup();
+                var stateGroup = new AudioStateGroup();
                 stateGroup.Id = reader.ReadUInt32();
                 stateGroup.MusicChangeAt = (MusicKeyPointByte)reader.ReadByte();
                 stateGroup.StateWithSettingsCount = reader.ReadUInt16();
@@ -957,7 +957,7 @@ namespace WwiseParserLib.Parsers.HIRC
             audioProperties.Rtpcs = new AudioRtpc[audioProperties.RtpcCount];
             for (var i = 0; i < audioProperties.RtpcCount; i++)
             {
-                AudioRtpc rtpc = new AudioRtpc();
+                var rtpc = new AudioRtpc();
                 rtpc.X = reader.ReadUInt32();
                 rtpc.IsMidi = reader.ReadBoolean();
                 rtpc.IsGeneralSettings = reader.ReadBoolean();
@@ -1004,7 +1004,7 @@ namespace WwiseParserLib.Parsers.HIRC
         private static AudioPathElement ReadPathElement(List<byte[]> sections, uint[] audioIds, uint childrenStartAt)
         {
             var elementIsEndpoint = false;
-            var hasAudioIds = audioIds == null;
+            var hasAudioIds = audioIds != null;
             var section = sections[(int)childrenStartAt];
 
             var fromStateOrSwitchId = BitConverter.ToUInt32(section, 0);

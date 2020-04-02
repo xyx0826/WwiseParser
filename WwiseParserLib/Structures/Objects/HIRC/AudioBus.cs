@@ -263,7 +263,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         BusVolume = 0x05
     }
 
-    public struct AudioStateGroup
+    public class AudioStateGroup
     {
         /// <summary>
         /// The ID of the State Group.
