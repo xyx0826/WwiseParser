@@ -1,20 +1,20 @@
 ﻿using System.IO;
 using WwiseParserLib.Structures.Sections;
 
-namespace WwiseParserLib.Structures
+namespace WwiseParserLib.Structures.SoundBanks
 {
-    public class InMemorySoundBank : SoundBank
+    public class FileSoundBank : SoundBank
     {
-        private readonly byte[] _blob = null;
+        public string FilePath { get; private set; }
 
-        public InMemorySoundBank(byte[] blob) : base()
+        public FileSoundBank(string filePath) : base()
         {
-            _blob = blob;
+            FilePath = filePath;
         }
 
         public override byte[] ReadSection(SoundBankSectionName name)
         {
-            using (var reader = new BinaryReader(new MemoryStream(_blob)))
+            using (var reader = new BinaryReader(File.OpenRead(FilePath)))
             {
                 while (reader.PeekChar() > -1)
                 {

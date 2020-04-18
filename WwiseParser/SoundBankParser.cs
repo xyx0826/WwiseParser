@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using WwiseParserLib.Structures;
 using WwiseParserLib.Structures.Objects.HIRC;
 using WwiseParserLib.Structures.Sections;
+using WwiseParserLib.Structures.SoundBanks;
 
 namespace WwiseParser
 {
