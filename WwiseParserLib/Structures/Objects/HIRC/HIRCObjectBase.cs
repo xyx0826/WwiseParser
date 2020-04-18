@@ -1,4 +1,7 @@
-﻿namespace WwiseParserLib.Structures.Objects.HIRC
+﻿using System;
+using System.Collections.Generic;
+
+namespace WwiseParserLib.Structures.Objects.HIRC
 {
     /// <summary>
     /// The base class of all HIRC section Wwise object structures.
@@ -30,6 +33,28 @@
         /// The ID of the object.
         /// </summary>
         public uint Id { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is HIRCObjectBase @base &&
+                   Type == @base.Type &&
+                   Id == @base.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Type, Id);
+        }
+
+        public static bool operator ==(HIRCObjectBase left, HIRCObjectBase right)
+        {
+            return EqualityComparer<HIRCObjectBase>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(HIRCObjectBase left, HIRCObjectBase right)
+        {
+            return !(left == right);
+        }
     }
 
     public enum HIRCObjectType : byte
