@@ -171,7 +171,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     rtpc.Points = new RtpcPoint[rtpc.PointCount];
                     for (var j = 0; j < rtpc.PointCount; j++)
                     {
-                        RtpcPoint rtpcPoint = default;
+                        RtpcPoint rtpcPoint = new RtpcPoint();
                         rtpcPoint.X = reader.ReadSingle();
                         rtpcPoint.Y = reader.ReadSingle();
                         rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte)reader.ReadByte();
