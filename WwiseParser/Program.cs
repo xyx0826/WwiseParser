@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using WwiseParserLib.Structures;
 using WwiseParserLib.Structures.Sections;
+using WwiseParserLib.Structures.SoundBanks;
 
 namespace WwiseParser
 {
@@ -19,7 +19,7 @@ namespace WwiseParser
                 //Output("\t--diff (-d):\tprint a message if output files have changed, and back up the old version");
                 Output("\t--no-stmg (-ns):\tskip STMG section");
                 Output("\t--no-hirc (-nh):\tskip HIRC section");
-                Output("build 20200319. partial EventAction support, MusicPlaylistContainer not yet implemented");
+                Output("build 20200419. partial EventAction support");
                 return;
             }
 

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using WwiseParserLib.Structures.Hierarchies;
 using WwiseParserLib.Structures.Objects.HIRC;
 using WwiseParserLib.Structures.Sections;
 using WwiseParserLib.Structures.SoundBanks;
@@ -141,7 +142,13 @@ namespace WwiseParser
         private void WriteJson(object obj, string fileName)
         {
             var path = Path.Combine(_outputPath, fileName + ".json");
-            var json = JsonConvert.SerializeObject(obj, Formatting.Indented, new StringEnumConverter());
+            var jsonSettings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            jsonSettings.Converters.Add(new StringEnumConverter());
+            var json = JsonConvert.SerializeObject(obj, jsonSettings);
             File.WriteAllText(path, json);
         }
 
