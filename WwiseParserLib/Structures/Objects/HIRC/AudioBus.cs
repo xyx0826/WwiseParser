@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class AudioBus : HIRCObjectBase
     {
         public AudioBus(int length) : base(HIRCObjectType.AudioBus, (uint)length)
@@ -10,6 +13,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         }
 
+        #region Reader properties
         /// <summary>
         /// <para>The ID of the parent bus of the audio bus.</para>
         /// <para>Is zero for master busses.</para>
@@ -132,6 +136,47 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Located at: Audio Bus Property Editor > States</para>
         /// </summary>
         public AudioStateGroup[] StateGroups { get; set; }
+        #endregion
+
+        #region Relationship properties
+        private List<AudioBus> _children;
+
+        public IReadOnlyCollection<AudioBus> Children => _children;
+
+        public AudioBus Parent { get; private set; }
+        #endregion
+
+        private string DebuggerDisplay
+        {
+            get => $"{GetType().Name}, {(_children == null ? 1 : _children.Count)} children";
+        }
+
+        /// <summary>
+        /// Adds a child to the current bus. If successful, the <see cref="Parent"/> of the child bus will be updated.
+        /// </summary>
+        /// <param name="audioBus">The child bus.</param>
+        public void AddChild(AudioBus audioBus)
+        {
+            _children ??= new List<AudioBus>();
+            if (audioBus.ParentId == Id)
+            {
+                audioBus.Parent ??= this;
+                _children.Add(audioBus);
+            }
+        }
+
+        /// <summary>
+        /// Sets the parent of the current bus. If successful, the <see cref="Children"/> of the parent bus will be updated.
+        /// </summary>
+        /// <param name="audioBus">The parent bus.</param>
+        public void SetParent(AudioBus audioBus)
+        {
+            if (audioBus.Id == ParentId)
+            {
+                Parent = audioBus;
+                audioBus.AddChild(this);
+            }
+        }
     }
 
     [Flags]
