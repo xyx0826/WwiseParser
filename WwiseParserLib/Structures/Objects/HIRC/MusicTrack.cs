@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicTrack : HIRCObjectBase
+    public class MusicTrack : Actor
     {
         public MusicTrack(int length) : base(HIRCObjectType.MusicTrack, (uint)length)
         {
@@ -48,11 +48,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Parameter curves of the Music Track.</para>
         /// </summary>
         public MusicTrackCurve[] Curves { get; set; }
-
-        /// <summary>
-        /// Additional properties of the Music Track.
-        /// </summary>
-        public AudioProperties Properties { get; set; }
 
         /// <summary>
         /// <para>The type of the Music Track.</para>

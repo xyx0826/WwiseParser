@@ -6,7 +6,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
     /// <summary>
     /// The base class of all HIRC section Wwise object structures.
     /// </summary>
-    public class HIRCObjectBase : WwiseObjectBase
+    public abstract class HIRCObjectBase : WwiseObjectBase
     {
         private HIRCObjectBase()
         {

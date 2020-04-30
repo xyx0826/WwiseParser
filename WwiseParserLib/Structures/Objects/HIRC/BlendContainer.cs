@@ -2,17 +2,12 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class BlendContainer : HIRCObjectBase
+    public class BlendContainer : Actor
     {
         public BlendContainer(int length) : base(HIRCObjectType.BlendContainer, (uint)length)
         {
 
         }
-
-        /// <summary>
-        /// Additional properties of the Blend Container.
-        /// </summary>
-        public AudioProperties Properties { get; set; }
 
         /// <summary>
         /// <para>The count of children of the Blend Container.</para>

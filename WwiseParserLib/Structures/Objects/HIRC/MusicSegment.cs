@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicSegment : HIRCObjectBase
+    public class MusicSegment : Actor
     {
         public MusicSegment(int length) : base(HIRCObjectType.MusicSegment, (uint)length)
         {
@@ -14,11 +14,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Location: Music Segment Property Editor > MIDI</para>
         /// </summary>
         public MusicMidiBehavior MidiBehavior { get; set; }
-
-        /// <summary>
-        /// <para>Additional properties of the Music Segment.</para>
-        /// </summary>
-        public AudioProperties Properties { get; set; }
 
         /// <summary>
         /// <para>The count of children Music Tracks of the Music Segment.</para>

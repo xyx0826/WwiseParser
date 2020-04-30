@@ -3,17 +3,12 @@ using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class SwitchContainer : HIRCObjectBase
+    public class SwitchContainer : Actor
     {
         public SwitchContainer(int length) : base(HIRCObjectType.SwitchContainer, (uint)length)
         {
 
         }
-
-        /// <summary>
-        /// Additional properties of the Switch Container.
-        /// </summary>
-        public AudioProperties Properties { get; set; }
 
         /// <summary>
         /// <para>The type of group used by the Switch Container.</para>

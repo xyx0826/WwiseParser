@@ -1,9 +1,8 @@
 ﻿using System;
-using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Sound : HIRCObjectBase
+    public class Sound : Actor
     {
         public Sound(int length) : base(HIRCObjectType.Sound, (uint)length)
         {
@@ -52,11 +51,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>The type of the audio object.</para>
         /// </summary>
         public SoundType AudioType { get; set; }
-
-        /// <summary>
-        /// <para>Additional properties of the audio object.</para>
-        /// </summary>
-        public AudioProperties Properties { get; set; }
     }
 
     [Flags]

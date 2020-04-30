@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicPlaylistContainer : HIRCObjectBase
+    public class MusicPlaylistContainer : Actor
     {
         public MusicPlaylistContainer(int length) : base(HIRCObjectType.MusicPlaylistContainer, (uint)length)
         {
@@ -14,11 +14,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Location: Music Playlist Container Property Editor > MIDI</para>
         /// </summary>
         public MusicMidiBehavior MidiBehavior { get; set; }
-
-        /// <summary>
-        /// <para>Additional properties of the Music Playlist Container.</para>
-        /// </summary>
-        public AudioProperties Properties { get; set; }
 
         /// <summary>
         /// <para>The count of children Music Segments of the Music Playlist Container.</para>

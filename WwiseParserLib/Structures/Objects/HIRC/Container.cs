@@ -1,19 +1,13 @@
 ﻿using System;
-using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Container : HIRCObjectBase
+    public class Container : Actor
     {
         public Container(int length) : base(HIRCObjectType.Container, (uint)length)
         {
 
         }
-
-        /// <summary>
-        /// <para>Additional properties of the Random Container.</para>
-        /// </summary>
-        public AudioProperties Properties { get; set; }
 
         /// <summary>
         /// <para>The number of loops of the Random Container.</para>
