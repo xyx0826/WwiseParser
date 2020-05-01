@@ -51,6 +51,22 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>The type of the audio object.</para>
         /// </summary>
         public SoundType AudioType { get; set; }
+
+        public new uint ChildCount
+        {
+            get
+            {
+                throw new InvalidOperationException("This type of Actor does not have any children.");
+            }
+        }
+
+        public new uint[] ChildIds
+        {
+            get
+            {
+                throw new InvalidOperationException("This type of Actor does not have any children.");
+            }
+        }
     }
 
     [Flags]

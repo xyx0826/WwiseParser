@@ -9,15 +9,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         }
 
-        /// <summary>
-        /// <para>The count of children of the Blend Container.</para>
-        /// </summary>
-        public uint ChildCount { get; set; }
+        ///// <summary>
+        ///// <para>The count of children of the Blend Container.</para>
+        ///// </summary>
+        //public uint ChildCount { get; set; }
 
-        /// <summary>
-        /// <para>IDs of children of the Blend Container.</para>
-        /// </summary>
-        public uint[] ChildIds { get; set; }
+        ///// <summary>
+        ///// <para>IDs of children of the Blend Container.</para>
+        ///// </summary>
+        //public uint[] ChildIds { get; set; }
 
         /// <summary>
         /// <para>The count of Blend Tracks of the Blend Container.</para>

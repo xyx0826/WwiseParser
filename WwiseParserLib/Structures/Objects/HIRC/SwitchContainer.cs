@@ -1,5 +1,4 @@
 ﻿using System;
-using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -34,17 +33,17 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// </summary>
         public SwitchContainerMode Mode { get; set; }
 
-        /// <summary>
-        /// <para>The count of children of the Switch Container that are assigned to switches or states.</para>
-        /// <para>Determined by: Contents Editor > Assigned Objects</para>
-        /// </summary>
-        public uint AssignedChildCount { get; set; }
+        ///// <summary>
+        ///// <para>The count of children of the Switch Container that are assigned to switches or states.</para>
+        ///// <para>Determined by: Contents Editor > Assigned Objects</para>
+        ///// </summary>
+        //public uint ChildCount { get; set; }
 
-        /// <summary>
-        /// <para>IDs of children of the Switch Container that are assigned to switches or states.</para>
-        /// <para>Located at: Contents Editor > Assigned Objects</para>
-        /// </summary>
-        public uint[] AssignedChildIds { get; set; }
+        ///// <summary>
+        ///// <para>IDs of children of the Switch Container that are assigned to switches or states.</para>
+        ///// <para>Located at: Contents Editor > Assigned Objects</para>
+        ///// </summary>
+        //public uint[] ChildIds { get; set; }
 
         /// <summary>
         /// <para>The count of switches or states of the Switch Group or State Group used by the Switch Container.</para>
@@ -59,12 +58,12 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <summary>
         /// <para>The count of children of the Switch Container.</para>
         /// </summary>
-        public uint ChildCount { get; set; }
+        public uint SwitchChildCount { get; set; }
 
         /// <summary>
         /// <para>Children of the Switch Container.</para>
         /// </summary>
-        public SwitchChild[] Children { get; set; }
+        public SwitchChild[] SwitchChildren { get; set; }
     }
 
     public enum SwitchType : byte

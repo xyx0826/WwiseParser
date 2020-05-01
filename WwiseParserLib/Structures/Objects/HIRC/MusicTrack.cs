@@ -1,4 +1,5 @@
-﻿using WwiseParserLib.Structures.Objects.HIRC.Structs;
+﻿using System;
+using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -66,6 +67,22 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Located at: Music Track Property Editor > General Settings > Stream > Look-ahead time (ms)</para>
         /// </summary>
         public uint LookAheadTime { get; set; }
+
+        public new uint ChildCount
+        {
+            get
+            {
+                throw new InvalidOperationException("This type of Actor does not have any children.");
+            }
+        }
+
+        public new uint[] ChildIds
+        {
+            get
+            {
+                throw new InvalidOperationException("This type of Actor does not have any children.");
+            }
+        }
     }
 
     public struct MusicTrackTimeParameter

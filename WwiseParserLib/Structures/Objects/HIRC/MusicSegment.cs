@@ -15,15 +15,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// </summary>
         public MusicMidiBehavior MidiBehavior { get; set; }
 
-        /// <summary>
-        /// <para>The count of children Music Tracks of the Music Segment.</para>
-        /// </summary>
-        public uint ChildCount { get; set; }
+        ///// <summary>
+        ///// <para>The count of children Music Tracks of the Music Segment.</para>
+        ///// </summary>
+        //public uint ChildCount { get; set; }
 
-        /// <summary>
-        /// <para>IDs of children Music Tracks of the Music Segment.</para>
-        /// </summary>
-        public uint[] ChildIds { get; set; }
+        ///// <summary>
+        ///// <para>IDs of children Music Tracks of the Music Segment.</para>
+        ///// </summary>
+        //public uint[] ChildIds { get; set; }
 
         /// <summary>
         /// <para>The music grid duration of the Music Segment, in milliseconds.</para>

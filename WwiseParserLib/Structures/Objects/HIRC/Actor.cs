@@ -22,6 +22,10 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// </summary>
         public AudioProperties Properties { get; set; }
 
+        public uint ChildCount { get; set; }
+
+        public uint[] ChildIds { get; set; }
+
         private List<Actor> _children;
 
         public IReadOnlyCollection<Actor> Children => _children;
@@ -30,7 +34,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         private string DebuggerDisplay
         {
-            get => $"{GetType().Name}, {(_children == null ? 1 : _children.Count)} children";
+            get => $"{GetType().Name}, {ChildCount} children";
         }
 
         /// <summary>
