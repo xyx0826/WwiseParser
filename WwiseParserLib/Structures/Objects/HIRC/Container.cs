@@ -64,20 +64,22 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public ContainerSequenceBehavior Behavior { get; set; }
 
-        /// <summary>
-        /// <para>The count of children of the Random Container.</para>
-        /// </summary>
-        public uint ChildCount { get; set; }
+        ///// <summary>
+        ///// <para>The count of children of the Random Container.</para>
+        ///// </summary>
+        //public uint ChildCount { get; set; }
+
+        ///// <summary>
+        ///// <para>IDs of children of the Random Container.</para>
+        ///// </summary>
+        //public uint[] ChildIds { get; set; }
 
         /// <summary>
-        /// <para>IDs of children of the Random Container.</para>
+        /// Unknown count.
         /// </summary>
-        public uint[] ChildIds { get; set; }
+        public ushort UnknownParameterCount { get; set; }
 
-        /// <summary>
-        /// Unknown value. Appears to be zero.
-        /// </summary>
-        public ushort Unknown_4 { get; set; }
+        public ContainerUnknownParameter[] UnknownParameters { get; set; }
     }
 
     public enum ContainerTransitionType : byte
@@ -103,5 +105,12 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         PlayInReverseOrder  = 0b_0000_0100,
         PlayContinuously    = 0b_0000_1000,
         GlobalScope         = 0b_0001_0000
+    }
+
+    public struct ContainerUnknownParameter
+    {
+        public uint Id { get; set; }
+
+        public uint Parameter { get; set; }
     }
 }
