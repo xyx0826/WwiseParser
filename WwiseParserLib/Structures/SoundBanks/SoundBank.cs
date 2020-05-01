@@ -3,6 +3,8 @@ using System.Linq;
 using WwiseParserLib.Parsers.BKHD;
 using WwiseParserLib.Parsers.HIRC;
 using WwiseParserLib.Parsers.STMG;
+using WwiseParserLib.Structures.Hierarchies;
+using WwiseParserLib.Structures.Objects.HIRC;
 using WwiseParserLib.Structures.Sections;
 
 namespace WwiseParserLib.Structures.SoundBanks
@@ -72,6 +74,40 @@ namespace WwiseParserLib.Structures.SoundBanks
                 // Return saved section
                 return section;
             }
+        }
+
+        public MasterMixerHierarchy CreateMasterMixerHierarchy()
+        {
+            var hircSection = GetSection(SoundBankSectionName.HIRC);
+            if (hircSection == null)
+            {
+                throw new InvalidOperationException(
+                    "The SoundBank does not have a HIRC section, or is not yet parsed.");
+            }
+
+            var hier = new MasterMixerHierarchy();
+            var buses = (hircSection as HIRCSection).Objects
+                .Where(o => o is AudioBus)
+                .Select(o => o as AudioBus);
+            hier.AddBuses(buses);
+            return hier;
+        }
+
+        public ActorMixerHierarchy CreateActorMixerHierarchy()
+        {
+            var hircSection = GetSection(SoundBankSectionName.HIRC);
+            if (hircSection == null)
+            {
+                throw new InvalidOperationException(
+                    "The SoundBank does not have a HIRC section, or is not yet parsed.");
+            }
+
+            var hier = new ActorMixerHierarchy();
+            var actors = (hircSection as HIRCSection).Objects
+                .Where(o => o is Actor)
+                .Select(o => o as Actor);
+            hier.AddActors(actors);
+            return hier;
         }
     }
 }
