@@ -257,7 +257,15 @@ namespace WwiseParserLib.Parsers.HIRC
                 {
                     container.ChildIds[i] = reader.ReadUInt32();
                 }
-                container.Unknown_4 = reader.ReadUInt16();
+                container.UnknownParameterCount = reader.ReadUInt16();
+                container.UnknownParameters = new ContainerUnknownParameter[container.UnknownParameterCount];
+                for (var i = 0; i < container.UnknownParameterCount; i++)
+                {
+                    ContainerUnknownParameter containerUnknownParameter = default;
+                    containerUnknownParameter.Id = reader.ReadUInt32();
+                    containerUnknownParameter.Parameter = reader.ReadUInt32();
+                    container.UnknownParameters[i] = containerUnknownParameter;
+                }
 
                 Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return container;
@@ -294,11 +302,11 @@ namespace WwiseParserLib.Parsers.HIRC
                 switchContainer.GroupId = reader.ReadUInt32();
                 switchContainer.DefaultSwitchOrStateId = reader.ReadUInt32();
                 switchContainer.Mode = (SwitchContainerMode)reader.ReadByte();
-                switchContainer.AssignedChildCount = reader.ReadUInt32();
-                switchContainer.AssignedChildIds = new uint[switchContainer.AssignedChildCount];
-                for (var i = 0; i < switchContainer.AssignedChildCount; i++)
+                switchContainer.ChildCount = reader.ReadUInt32();
+                switchContainer.ChildIds = new uint[switchContainer.ChildCount];
+                for (var i = 0; i < switchContainer.ChildCount; i++)
                 {
-                    switchContainer.AssignedChildIds[i] = reader.ReadUInt32();
+                    switchContainer.ChildIds[i] = reader.ReadUInt32();
                 }
                 switchContainer.SwitchOrStateCount = reader.ReadUInt32();
                 switchContainer.SwitchOrStates = new SwitchOrState[switchContainer.SwitchOrStateCount];
@@ -314,9 +322,9 @@ namespace WwiseParserLib.Parsers.HIRC
                     }
                     switchContainer.SwitchOrStates[i] = switchOrState;
                 }
-                switchContainer.ChildCount = reader.ReadUInt32();
-                switchContainer.Children = new SwitchChild[switchContainer.ChildCount];
-                for (var i = 0; i < switchContainer.ChildCount; i++)
+                switchContainer.SwitchChildCount = reader.ReadUInt32();
+                switchContainer.SwitchChildren = new SwitchChild[switchContainer.SwitchChildCount];
+                for (var i = 0; i < switchContainer.SwitchChildCount; i++)
                 {
                     SwitchChild switchChild = default;
                     switchChild.Id = reader.ReadUInt32();
@@ -324,7 +332,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     switchChild.Unknown = reader.ReadByte();
                     switchChild.FadeOut = reader.ReadUInt32();
                     switchChild.FadeIn = reader.ReadUInt32();
-                    switchContainer.Children[i] = switchChild;
+                    switchContainer.SwitchChildren[i] = switchChild;
                 }
 
                 Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
@@ -465,11 +473,11 @@ namespace WwiseParserLib.Parsers.HIRC
                 musicSwitchContainer.Id = reader.ReadUInt32();
                 musicSwitchContainer.MidiBehavior = (MusicMidiBehavior)reader.ReadByte();
                 musicSwitchContainer.Properties = reader.ReadAudioProperties();
-                musicSwitchContainer.TrackCount = reader.ReadUInt32();
-                musicSwitchContainer.TrackIds = new uint[musicSwitchContainer.TrackCount];
-                for (var i = 0; i < musicSwitchContainer.TrackCount; i++)
+                musicSwitchContainer.ChildCount = reader.ReadUInt32();
+                musicSwitchContainer.ChildIds = new uint[musicSwitchContainer.ChildCount];
+                for (var i = 0; i < musicSwitchContainer.ChildCount; i++)
                 {
-                    musicSwitchContainer.TrackIds[i] = reader.ReadUInt32();
+                    musicSwitchContainer.ChildIds[i] = reader.ReadUInt32();
                 }
                 musicSwitchContainer.GridPeriodTime = reader.ReadDouble();
                 musicSwitchContainer.GridOffsetTime = reader.ReadDouble();
@@ -542,7 +550,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 }
                 musicSwitchContainer.PathSectionLength = reader.ReadUInt32();
                 musicSwitchContainer.UseWeighted = reader.ReadBoolean();
-                musicSwitchContainer.Paths = reader.ReadPaths(musicSwitchContainer.PathSectionLength, musicSwitchContainer.TrackIds);
+                musicSwitchContainer.Paths = reader.ReadPaths(musicSwitchContainer.PathSectionLength, musicSwitchContainer.ChildIds);
 
                 Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return musicSwitchContainer;
@@ -741,11 +749,11 @@ namespace WwiseParserLib.Parsers.HIRC
                 musicPlaylistContainer.Id = reader.ReadUInt32();
                 musicPlaylistContainer.MidiBehavior = (MusicMidiBehavior)reader.ReadByte();
                 musicPlaylistContainer.Properties = reader.ReadAudioProperties();
-                musicPlaylistContainer.SegmentCount = reader.ReadUInt32();
-                musicPlaylistContainer.SegmentIds = new uint[musicPlaylistContainer.SegmentCount];
-                for (var i = 0; i < musicPlaylistContainer.SegmentCount; i++)
+                musicPlaylistContainer.ChildCount = reader.ReadUInt32();
+                musicPlaylistContainer.ChildIds = new uint[musicPlaylistContainer.ChildCount];
+                for (var i = 0; i < musicPlaylistContainer.ChildCount; i++)
                 {
-                    musicPlaylistContainer.SegmentIds[i] = reader.ReadUInt32();
+                    musicPlaylistContainer.ChildIds[i] = reader.ReadUInt32();
                 }
                 musicPlaylistContainer.GridPeriodTime = reader.ReadDouble();
                 musicPlaylistContainer.GridOffsetTime = reader.ReadDouble();
@@ -985,7 +993,7 @@ namespace WwiseParserLib.Parsers.HIRC
                 rtpc.Points = new RtpcPoint[rtpc.PointCount];
                 for (var j = 0; j < rtpc.PointCount; j++)
                 {
-                    RtpcPoint rtpcPoint = default;
+                    RtpcPoint rtpcPoint = new RtpcPoint();
                     rtpcPoint.X = reader.ReadSingle();
                     rtpcPoint.Y = reader.ReadSingle();
                     rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte)reader.ReadByte();
