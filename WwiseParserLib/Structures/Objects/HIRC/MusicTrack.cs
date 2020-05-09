@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
@@ -83,6 +85,27 @@ namespace WwiseParserLib.Structures.Objects.HIRC
                 throw new InvalidOperationException("This type of Actor does not have any children.");
             }
         }
+
+        public override string Serialize()
+        {
+            var sb = new StringBuilder(base.Serialize());
+            sb.AppendLine(", " + TrackType);
+            sb.AppendLine("====== MUSIC TRACK ======");
+            for (int i = 0; i < SoundCount; i++)
+            {
+                var sound = Sounds[i];
+                var tp = TimeParameters[i];
+                var beginAt = tp.BeginOffset + tp.BeginTrimOffset;
+                var duration = tp.EndOffset + tp.EndTrimOffset - tp.BeginTrimOffset;
+                var endAt = beginAt + duration;
+                sb.AppendLine(beginAt.ToTimeCode() + " => " + endAt.ToTimeCode());
+                sb.AppendLine(sound.Serialize()
+                    + ", from " + tp.BeginTrimOffset.ToTimeCode() + " to " + (tp.EndOffset + tp.EndTrimOffset).ToTimeCode()
+                    + ", run duration: " + duration.ToTimeCode());
+            }
+            sb.AppendLine("=========================");
+            return sb.ToString();
+        }
     }
 
     public struct MusicTrackTimeParameter
@@ -108,14 +131,14 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public double BeginTrimOffset { get; set; }
 
         /// <summary>
-        /// <para>The end offset of this Music Track, relative to the timeline of its parent.</para>
-        /// </summary>
-        public double EndOffset { get; set; }
-
-        /// <summary>
         /// <para>The length trimmed from the end of this Music Track.</para>
         /// </summary>
         public double EndTrimOffset { get; set; }
+
+        /// <summary>
+        /// <para>The end offset of this Music Track, relative to the timeline of its parent.</para>
+        /// </summary>
+        public double EndOffset { get; set; }
     }
 
     public struct MusicTrackCurve

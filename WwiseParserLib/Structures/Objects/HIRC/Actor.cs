@@ -63,5 +63,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
                 actor.AddChild(this);
             }
         }
+
+        /// <summary>
+        /// Serializes the Actor in the format of its hexadecimal ID
+        /// appended by a whitespace and its type name.
+        /// </summary>
+        /// <returns>The serialized representation.</returns>
+        public virtual string Serialize()
+        {
+            return Id.ToHex() + ' ' + this.GetType().Name;
+        }
     }
 }

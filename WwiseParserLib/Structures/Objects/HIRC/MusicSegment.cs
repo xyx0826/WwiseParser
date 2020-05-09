@@ -1,4 +1,5 @@
-﻿using WwiseParserLib.Structures.Objects.HIRC.Structs;
+﻿using System.Text;
+using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -90,6 +91,11 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Determined by: Music Editor > (Editor)</para>
         /// </summary>
         public MusicCue[] MusicCues { get; set; }
+
+        public override string Serialize()
+        {
+            return base.Serialize();
+        }
     }
 
     public struct MusicCue

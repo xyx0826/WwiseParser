@@ -67,6 +67,11 @@ namespace WwiseParserLib.Structures.Objects.HIRC
                 throw new InvalidOperationException("This type of Actor does not have any children.");
             }
         }
+
+        public override string Serialize()
+        {
+            return AudioId.ToHex() + ".wem";
+        }
     }
 
     [Flags]

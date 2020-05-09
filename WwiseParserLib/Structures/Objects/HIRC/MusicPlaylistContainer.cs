@@ -1,4 +1,7 @@
-﻿using WwiseParserLib.Structures.Objects.HIRC.Structs;
+﻿using System;
+using System.Linq;
+using System.Text;
+using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -90,6 +93,16 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public uint PlaylistElementCount { get; set; }
 
         public MusicPlaylistElement Playlist { get; set; }
+
+        public override string Serialize()
+        {
+            var sb = new StringBuilder(base.Serialize());
+            sb.AppendLine();
+            sb.AppendLine("====== MUSIC PLAYLIST ======");
+            sb.Append(Playlist.Serialize());
+            sb.AppendLine("============================");
+            return sb.ToString();
+        }
     }
 
     public struct MusicPlaylistElement
@@ -117,6 +130,44 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public bool IsShuffle { get; set; }
 
         public MusicPlaylistElement[] Children { get; set; }
+
+        public StringBuilder Serialize(StringBuilder sb = null, int depth = 0)
+        {
+            sb ??= new StringBuilder();
+            sb.Append("".Indent(depth));
+            if (Type == MusicPlaylistElementType.MusicSegment)
+            {
+                // Segment ID
+                sb.Append("Segment " + SegmentId.ToHex());
+            }
+            else
+            {
+                // Play behavior
+                sb.Append(Type);
+                if (IsShuffle)
+                {
+                    sb.Append(", shuffle");
+                }
+            }
+            // Loop behavior
+            if (LoopCount == 1)
+            {
+                sb.AppendLine(", play once");
+            }
+            else if (LoopCount == 0)
+            {
+                sb.AppendLine(", loop infinitely");
+            }
+            else
+            {
+                sb.AppendLine(", loop " + LoopCount + " times");
+            }
+            foreach (var child in Children)
+            {
+                child.Serialize(sb, depth + 4);
+            }
+            return sb;
+        }
     }
 
     public enum MusicPlaylistElementType : uint

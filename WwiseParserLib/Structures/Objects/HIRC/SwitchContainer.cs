@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -64,6 +66,20 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Children of the Switch Container.</para>
         /// </summary>
         public SwitchChild[] SwitchChildren { get; set; }
+
+        public override string Serialize()
+        {
+            var sb = new StringBuilder(base.Serialize());
+            sb.AppendLine();
+            sb.AppendLine("====== SWITCHES ======");
+            sb.AppendLine($"Group ID: {GroupId.ToHex()}");
+            foreach (var s in SwitchOrStates)
+            {
+                sb.AppendLine("Switch " + s.Id.ToHex() + " => " + String.Join(", ", s.AssignedChildIds));
+            }
+            sb.AppendLine("======================");
+            return sb.ToString();
+        }
     }
 
     public enum SwitchType : byte
