@@ -34,7 +34,7 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// Parses the specified section.
         /// </summary>
         /// <param name="name">The name of the section to parse.</param>
-        /// <returns>The parsed section, or <see cref="null"/> if one does not exist.</returns>
+        /// <returns>The parsed section, or null if one does not exist.</returns>
         /// <exception cref="NotImplementedException">
         /// Thrown when a section other than <see cref="SoundBankSectionName.BKHD"/>,
         /// <see cref="SoundBankSectionName.HIRC"/>, <see cref="SoundBankSectionName.STMG"/>
@@ -67,7 +67,7 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// Gets the parsed specified section from the current SoundBank.
         /// </summary>
         /// <param name="name">The name of the section.</param>
-        /// <returns>The parsed specified section, or <see cref="null"/> if one does not exist.</returns>
+        /// <returns>The parsed specified section, or null if one does not exist.</returns>
         /// <exception cref="NotImplementedException">
         /// Thrown when an unsupported section name is specified.
         /// See <see cref="ParseSection(SoundBankSectionName)"/>.</exception>

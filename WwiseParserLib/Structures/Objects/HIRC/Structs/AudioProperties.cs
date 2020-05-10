@@ -130,24 +130,28 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         /// <para>Control point keys on the timeline of the audio object.</para>
         /// <para>Only exists when <see cref="AudioPositioningBehavior.ThreeDimensional"/> is set, and <see cref="IsGameDefined"/> is false.</para>
         /// <para>Located at: Position Editor (3D User-defined) > (Editor)</para>
+        /// </summary>
         public AudioControlPointKey[] ControlPointKeys { get; set; }
 
         /// <summary>
         /// <para>The count of random ranges of the audio object.</para>
         /// <para>Only exists when <see cref="AudioPositioningBehavior.ThreeDimensional"/> is set, and <see cref="IsGameDefined"/> is false.</para>
         /// <para>Determined by: Position Editor (3D User-defined) > Random Range</para>
+        /// </summary>
         public uint RandomRangeCount { get; set; }
 
         /// <summary>
         /// <para>Unknown values of random ranges of the audio object.</para>
         /// <para>Only exists when <see cref="AudioPositioningBehavior.ThreeDimensional"/> is set, and <see cref="IsGameDefined"/> is false.</para>
         /// <para>Determined by: Position Editor (3D User-defined) > Random Range</para>
+        /// </summary>
         public AudioPathRandomUnknown[] RandomRangeUnknowns { get; set; }
 
         /// <summary>
         /// <para>Random ranges of the audio object.</para>
         /// <para>Only exists when <see cref="AudioPositioningBehavior.ThreeDimensional"/> is set, and <see cref="IsGameDefined"/> is false.</para>
         /// <para>Located at: Position Editor (3D User-defined) > Random Range</para>
+        /// </summary>
         public AudioPathRandomRange[] RandomRanges { get; set; }
 
         /// <summary>
@@ -217,6 +221,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         /// <summary>
         /// <para>RTPCs of the audio object.</para>
         /// <para>Located at: Sound Property Editor > RTPC > (Add)</para>
+        /// </summary>
         public AudioRtpc[] Rtpcs { get; set; }
     }
 
@@ -420,11 +425,13 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         /// <summary>
         /// <para>The x-axis coordinate of the control point key.</para>
         /// <para>Located at: Position Editor (3D User-defined) > X:</para>
+        /// </summary>
         public float X { get; set; }
 
         /// <summary>
         /// <para>The z-axis coordinate of the control point key.</para>
         /// <para>Located at: Position Editor (3D User-defined) > Z:</para>
+        /// </summary>
         public float Z { get; set; }
 
         /// <summary>

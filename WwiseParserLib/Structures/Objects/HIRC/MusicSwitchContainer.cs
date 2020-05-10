@@ -196,7 +196,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         /// <summary>
         /// <para>The shape of destination fade-in curve.</para>
-        /// <para?>Located at: Music Switch Container Property Editor > Transitions > Destination > Edit... > Curve</para>
+        /// <para>Located at: Music Switch Container Property Editor > Transitions > Destination > Edit... > Curve</para>
         /// </summary>
         public AudioCurveShapeUInt FadeInCurveShape { get; set; }
 

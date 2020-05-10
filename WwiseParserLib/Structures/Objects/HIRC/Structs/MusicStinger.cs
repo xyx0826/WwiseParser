@@ -16,6 +16,7 @@
         /// <para>The key point that the Stinger plays at.</para>
         /// <para>Read this value as a <see cref="uint"/> and convert it to a <see cref="MusicKeyPointUInt"/>.</para>
         /// <para>Located at: Music Segment Property Editor > Stingers > Play At</para>
+        /// </summary>
         public MusicKeyPointUInt PlayAt { get; set; }
 
         /// <summary>
