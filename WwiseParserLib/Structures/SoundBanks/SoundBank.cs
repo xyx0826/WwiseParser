@@ -11,7 +11,7 @@ namespace WwiseParserLib.Structures.SoundBanks
 {
     public abstract class SoundBank
     {
-        public SoundBank()
+        protected SoundBank()
         {
             // Set section array length to maximum possible
             var sectionCount = Enum.GetValues(typeof(SoundBankSectionName)).Length;
@@ -51,7 +51,8 @@ namespace WwiseParserLib.Structures.SoundBanks
         // try to get a parsed section, null if not exists
         public SoundBankSection GetSection(SoundBankSectionName name)
         {
-            var section = _parsedSections.SingleOrDefault(x => x.Name == name);
+            var section = _parsedSections
+                .SingleOrDefault(x => x != null && x.Name == name);
             if (section == null)
             {
                 if ((section = ParseSection(name)) == null)

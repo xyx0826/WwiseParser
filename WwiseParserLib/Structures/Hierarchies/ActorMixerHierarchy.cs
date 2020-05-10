@@ -7,6 +7,7 @@ namespace WwiseParserLib.Structures.Hierarchies
 {
     public class ActorMixerHierarchy
     {
+        private const string Blanks = "                                                                ";
         private ILookup<uint, Actor> _actorGroups;
 
         private bool _loaded;
@@ -33,6 +34,27 @@ namespace WwiseParserLib.Structures.Hierarchies
             _loaded = true;
         }
 
+        public void Serialize()
+        {
+            foreach (var actor in _linkedActors)
+            {
+                PrintHierarchy(0, actor);
+            }
+        }
+
+        private void PrintHierarchy(int level, Actor actor)
+        {
+            PrintIndented(level, actor.Serialize());
+
+            if (actor.ChildCount > 0)
+            {
+                foreach (var child in actor.Children)
+                {
+                    PrintHierarchy(level + 4, child);
+                }
+            }
+        }
+
         private void GetOrphanedActors()
         {
             _linkedActors = _actorGroups
@@ -50,6 +72,14 @@ namespace WwiseParserLib.Structures.Hierarchies
                     child.SetParent(actor);
                     FindChildren(child);
                 }
+            }
+        }
+
+        private void PrintIndented(int level, string message)
+        {
+            foreach (var s in message.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                Console.WriteLine(Blanks.Substring(0, level) + s);
             }
         }
     }
