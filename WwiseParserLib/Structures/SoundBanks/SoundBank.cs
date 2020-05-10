@@ -11,19 +11,34 @@ namespace WwiseParserLib.Structures.SoundBanks
 {
     public abstract class SoundBank
     {
+        /// <summary>
+        /// All parsed sections of the current SoundBank.
+        /// </summary>
+        protected SoundBankSection[] _parsedSections;
+
         protected SoundBank()
         {
-            // Set section array length to maximum possible
+            // Assume array will contain all sections
             var sectionCount = Enum.GetValues(typeof(SoundBankSectionName)).Length;
             _parsedSections = new SoundBankSection[sectionCount];
         }
 
-        protected SoundBankSection[] _parsedSections;
-
-        // read binary data of a section
+        /// <summary>
+        /// Reads the binary data of the specified section.
+        /// </summary>
+        /// <param name="name">The name of the section to read.</param>
+        /// <returns>The data of the section.</returns>
         public abstract byte[] ReadSection(SoundBankSectionName name);
 
-        // try to read and parse a section, null if not exists
+        /// <summary>
+        /// Parses the specified section.
+        /// </summary>
+        /// <param name="name">The name of the section to parse.</param>
+        /// <returns>The parsed section, or <see cref="null"/> if one does not exist.</returns>
+        /// <exception cref="NotImplementedException">
+        /// Thrown when a section other than <see cref="SoundBankSectionName.BKHD"/>,
+        /// <see cref="SoundBankSectionName.HIRC"/>, <see cref="SoundBankSectionName.STMG"/>
+        /// is specified and exists, because their parsers are not implemented yet.</exception>
         public SoundBankSection ParseSection(SoundBankSectionName name)
         {
             var blob = ReadSection(name);
@@ -48,11 +63,21 @@ namespace WwiseParserLib.Structures.SoundBanks
             }
         }
 
-        // try to get a parsed section, null if not exists
+        /// <summary>
+        /// Gets the parsed specified section from the current SoundBank.
+        /// </summary>
+        /// <param name="name">The name of the section.</param>
+        /// <returns>The parsed specified section, or <see cref="null"/> if one does not exist.</returns>
+        /// <exception cref="NotImplementedException">
+        /// Thrown when an unsupported section name is specified.
+        /// See <see cref="ParseSection(SoundBankSectionName)"/>.</exception>
         public SoundBankSection GetSection(SoundBankSectionName name)
         {
-            var section = _parsedSections
-                .SingleOrDefault(x => x != null && x.Name == name);
+            // Is it already parsed?
+            // The index of the section in all sections
+            var sectionIdx = Array.IndexOf(
+                Enum.GetValues(typeof(SoundBankSectionName)), name);
+            var section = _parsedSections[sectionIdx];
             if (section == null)
             {
                 if ((section = ParseSection(name)) == null)
@@ -62,28 +87,31 @@ namespace WwiseParserLib.Structures.SoundBanks
                 }
                 else
                 {
-                    // Save section and return
-                    for (var i = 0; i < _parsedSections.Length; i++)
-                    {
-                        _parsedSections[i] ??= section;
-                    }
+                    // Save parsed section and return
+                    _parsedSections[sectionIdx] = section;
                     return section;
                 }
             }
             else
             {
-                // Return saved section
+                // Return already parsed section
                 return section;
             }
         }
 
+        /// <summary>
+        /// Creates a Master-Mixer Hierarchy from the current SoundBank.
+        /// </summary>
+        /// <returns>The parsed and rebuilt hierarchy.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when a HIRC section does not exist.</exception>
         public MasterMixerHierarchy CreateMasterMixerHierarchy()
         {
             var hircSection = GetSection(SoundBankSectionName.HIRC);
             if (hircSection == null)
             {
                 throw new InvalidOperationException(
-                    "The SoundBank does not have a HIRC section, or is not yet parsed.");
+                    "The SoundBank does not have a HIRC section.");
             }
 
             var hier = new MasterMixerHierarchy();
@@ -94,13 +122,19 @@ namespace WwiseParserLib.Structures.SoundBanks
             return hier;
         }
 
+        /// <summary>
+        /// Creates an Actor-Mixer hierarchy from the current SoundBank.
+        /// </summary>
+        /// <returns>The parsed and rebuilt hierarchy.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when a HIRC section does not exist.</exception>
         public ActorMixerHierarchy CreateActorMixerHierarchy()
         {
             var hircSection = GetSection(SoundBankSectionName.HIRC);
             if (hircSection == null)
             {
                 throw new InvalidOperationException(
-                    "The SoundBank does not have a HIRC section, or is not yet parsed.");
+                    "The SoundBank does not have a HIRC section.");
             }
 
             var hier = new ActorMixerHierarchy();

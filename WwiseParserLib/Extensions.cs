@@ -1,56 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-
-namespace WwiseParserLib
+﻿namespace WwiseParserLib
 {
     /// <summary>
     /// Extensions for data conversion and representation.
     /// </summary>
     internal static class Extensions
     {
+        /// <summary>
+        /// A bunch of whitespaces.
+        /// </summary>
         private const string Blanks = "                                                            ";
 
-        // note that these are in big endian, corresponding to hex editor
-        private static Dictionary<uint, string> _hashPairs = new Dictionary<uint, string>()
-        {
-            { 0x37BCB7E2, "Master Audio Bus" },
-            { 0xF76EFE2F, "Master Secondary Bus" }
-        };
-
-        internal static string GetSwappedUInt32(this byte[] bytes)
-        {
-            long value = BitConverter.ToUInt32(bytes, 0);
-            value = IPAddress.NetworkToHostOrder(value);
-            var id = (uint)(value >> 32);
-            return _hashPairs.ContainsKey(id)
-                ? id.ToString("X") + '_' + _hashPairs[id]
-                : id.ToString("X");
-        }
-
-        internal static uint GetDecimalUInt32(this byte[] bytes)
-            => BitConverter.ToUInt32(bytes, 0);
-
-        public static string ToHex(this byte value)
-            => value.ToString("x2");
-
-        public static string ToHex(this ushort value)
-            => value.ToString("x4");
-
+        /// <summary>
+        /// Converts the value to a 8-character lowercase hex representation.
+        /// </summary>
+        /// <param name="value">The value to be converted.</param>
+        /// <returns>The hexadecimal representation.</returns>
         public static string ToHex(this uint value)
             => value.ToString("x8");
 
-        public static string ToHex(this ulong value)
-            => value.ToString("x16");
-
-        public static string ToHex(this int value)
-            => value.ToString("x8");
-
+        /// <summary>
+        /// Indents the string by the specified length.
+        /// </summary>
+        /// <param name="str">The string to be indented.</param>
+        /// <param name="count">The length of the indentation.</param>
+        /// <returns>The indented string.</returns>
         public static string Indent(this string str, int count)
         {
             return Blanks.Substring(0, count) + str;
         }
 
+        /// <summary>
+        /// Indents the multi-line string by the specified length.
+        /// </summary>
+        /// <param name="str">The string to be indented.</param>
+        /// <param name="count">The length of the indentation.</param>
+        /// <returns>The indented string.</returns>
+        public static string IndentLines(this string str, int count)
+        {
+            var indentation = "".Indent(count);
+            // No newline before the first line
+            return indentation + str.Replace("\n", '\n' + indentation);
+        }
+
+        /// <summary>
+        /// Converts the milliseconds duration to timecode.
+        /// Format: mm:ss.0ms
+        /// </summary>
+        /// <param name="ms">The time duration in milliseconds.</param>
+        /// <returns>The converted timecode.</returns>
         public static string ToTimeCode(this double ms)
         {
             var secs = (int)ms / 1000;
