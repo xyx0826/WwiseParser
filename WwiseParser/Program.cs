@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using WwiseParserLib.Structures.Sections;
-using WwiseParserLib.Structures.SoundBanks;
 
 namespace WwiseParser
 {
@@ -23,20 +21,11 @@ namespace WwiseParser
                 return;
             }
 
-            var soundBank = new FileSoundBank(args[0]);
-
-            // Validate file
-            var bkhd = soundBank.ParseSection(SoundBankSectionName.BKHD);
-            if (bkhd == null)
-            {
-                throw new ArgumentException("HIRC section not found. The specified SoundBank is invalid.");
-            }
-
+            // Set switches and go
             var parser = new SoundBankParser(args[0],
                 args.HasSwitch("no-stmg", "ns"),
                 args.HasSwitch("no-hirc", "nh"),
                 args.HasSwitch("inspector", "i"));
-
             parser.Parse();
         }
 
