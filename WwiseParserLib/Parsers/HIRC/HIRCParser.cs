@@ -588,8 +588,8 @@ namespace WwiseParserLib.Parsers.HIRC
                     timeParameter.AudioId = reader.ReadUInt32();
                     timeParameter.BeginOffset = reader.ReadDouble();
                     timeParameter.BeginTrimOffset = reader.ReadDouble();
-                    timeParameter.EndOffset = reader.ReadDouble();
                     timeParameter.EndTrimOffset = reader.ReadDouble();
+                    timeParameter.EndOffset = reader.ReadDouble();
                     musicTrack.TimeParameters[i] = timeParameter;
                 }
                 musicTrack.SubTrackCount = reader.ReadUInt32();
