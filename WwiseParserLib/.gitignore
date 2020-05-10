@@ -1,0 +1,3 @@
+# Ignore DocFx build output
+_site
+log.txt

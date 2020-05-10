@@ -12,4 +12,11 @@
     <OutputPath>../build/</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="docfx.console" Version="2.52.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
