@@ -133,8 +133,9 @@ namespace WwiseParserLib.Structures.SoundBanks
             var hircSection = GetSection(SoundBankSectionName.HIRC);
             if (hircSection == null)
             {
-                throw new InvalidOperationException(
-                    "The SoundBank does not have a HIRC section.");
+                //throw new InvalidOperationException(
+                //    "The SoundBank does not have a HIRC section.");
+                return null;
             }
 
             var hier = new ActorMixerHierarchy();

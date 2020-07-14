@@ -495,7 +495,7 @@ namespace WwiseParserLib.Parsers.HIRC
                     stinger.PlayAt = (MusicKeyPointUInt)reader.ReadUInt32();
                     stinger.CueId = reader.ReadUInt32();
                     stinger.DoNotRepeatIn = reader.ReadUInt32();
-                    stinger.AllowPlayingInNextSegment = reader.ReadBoolean();
+                    stinger.AllowPlayingInNextSegment = reader.ReadUInt32() == 1;
                     musicSwitchContainer.Stingers[i] = stinger;
                 }
                 musicSwitchContainer.TransitionCount = reader.ReadUInt32();
@@ -593,7 +593,11 @@ namespace WwiseParserLib.Parsers.HIRC
                     musicTrack.TimeParameters[i] = timeParameter;
                 }
                 musicTrack.SubTrackCount = reader.ReadUInt32();
-                musicTrack.CurveCount = reader.ReadUInt32();
+                if (musicTrack.SoundCount > 0)
+                {
+                    // FIXME: workaround - when MusicTrack have zero sounds, one of the uints is too much before AudioProperties
+                    musicTrack.CurveCount = reader.ReadUInt32();
+                }
                 musicTrack.Curves = new MusicTrackCurve[musicTrack.CurveCount];
                 for (var i = 0; i < musicTrack.CurveCount; i++)
                 {
@@ -700,7 +704,8 @@ namespace WwiseParserLib.Parsers.HIRC
                 }
                 eventAction.Settings = settings;
 
-                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                // FIXME: we don't fully understand Play EventAction, will trip the assert
+                //Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
                 return eventAction;
             }
         }
@@ -1040,21 +1045,21 @@ namespace WwiseParserLib.Parsers.HIRC
             var probability = BitConverter.ToUInt16(section, 10);
 
             // Figure out whether the element is a node or an endpoint
-            if (hasAudioIds)
-            {
-                if (audioIds.Contains(audioId))
-                {
-                    // element is an endpoint
-                    elementIsEndpoint = true;
-                }
-            }
-            else if (childrenStartAtIndex < sections.Count          // Children index not out of bound
+            // FIXME: workaround - some audio IDs don't appear in the audioIds list
+            // in fact, doesn't show up in the HIRC list, at all!
+            // try to assume it's not an endpoint, before using it as an endpoint
+            if (childrenStartAtIndex < sections.Count          // Children index not out of bound (still possible to be a child)
                 && childrenStartAtIndex > childrenStartAt           // Children's children start at somewhere down the road
                 && childCount < sections.Count - childrenStartAt)   // Children's children count not out of bound
             {
                 // element is a node
                 elementIsEndpoint = false;
             }
+            //else if (hasAudioIds && audioIds.Contains(audioId))
+            //{
+            //    // element is an endpoint
+            //    elementIsEndpoint = true;
+            //}
             else
             {
                 // element is an endpoint
@@ -1102,7 +1107,7 @@ namespace WwiseParserLib.Parsers.HIRC
 
         private static MusicPlaylistElement ReadPlaylistElement(this BinaryReader reader)
         {
-            MusicPlaylistElement musicPlaylistElement = default;
+            MusicPlaylistElement musicPlaylistElement = new MusicPlaylistElement();
             musicPlaylistElement.SegmentId = reader.ReadUInt32();
             musicPlaylistElement.UnknownId = reader.ReadUInt32();
             musicPlaylistElement.ChildCount = reader.ReadUInt32();

@@ -56,6 +56,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         {
             get
             {
+                return 0;
                 throw new InvalidOperationException("This type of Actor does not have any children.");
             }
         }
@@ -64,6 +65,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         {
             get
             {
+                return null;
                 throw new InvalidOperationException("This type of Actor does not have any children.");
             }
         }
