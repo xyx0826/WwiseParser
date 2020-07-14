@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Text;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
@@ -70,21 +71,9 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// </summary>
         public uint LookAheadTime { get; set; }
 
-        public new uint ChildCount
-        {
-            get
-            {
-                throw new InvalidOperationException("This type of Actor does not have any children.");
-            }
-        }
+        public new uint ChildCount => 0;
 
-        public new uint[] ChildIds
-        {
-            get
-            {
-                throw new InvalidOperationException("This type of Actor does not have any children.");
-            }
-        }
+        public new uint[] ChildIds => null;
 
         public override string Serialize()
         {
@@ -104,6 +93,26 @@ namespace WwiseParserLib.Structures.Objects.HIRC
                     + ", run duration: " + duration.ToTimeCode());
             }
             sb.AppendLine("=========================");
+            return sb.ToString();
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < SoundCount; i++)
+            {
+                var sound = Sounds[i];
+                sb.AppendLine(sound.Serialize() + ", " + TrackType);
+                var tp = TimeParameters[i];
+                var beginAt = tp.BeginOffset + tp.BeginTrimOffset;
+                var duration = tp.EndOffset + tp.EndTrimOffset - tp.BeginTrimOffset;
+                var endAt = beginAt + duration;
+                sb.AppendLine(beginAt.ToTimeCode() + " => " + endAt.ToTimeCode());
+                sb.AppendLine(tp.BeginTrimOffset.ToTimeCode()
+                    + " => "
+                    + (tp.EndOffset + tp.EndTrimOffset).ToTimeCode());
+                sb.Append("Ginsor: " + ((uint)IPAddress.NetworkToHostOrder((int)sound.AudioId)).ToHex().ToUpper());
+            }
             return sb.ToString();
         }
     }
@@ -139,6 +148,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>The end offset of this Music Track, relative to the timeline of its parent.</para>
         /// </summary>
         public double EndOffset { get; set; }
+
+        public override string ToString()
+        {
+            var beginAt = BeginOffset + BeginTrimOffset;
+            var duration = EndOffset + EndTrimOffset - BeginTrimOffset;
+            var endAt = beginAt + duration;
+            return $"{beginAt.ToTimeCode()} => {endAt.ToTimeCode()}\n" +
+                $"{BeginTrimOffset.ToTimeCode()} => {(EndOffset - EndTrimOffset).ToTimeCode()}";
+        }
     }
 
     public struct MusicTrackCurve

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
@@ -17,16 +19,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Location: Music Playlist Container Property Editor > MIDI</para>
         /// </summary>
         public MusicMidiBehavior MidiBehavior { get; set; }
-
-        ///// <summary>
-        ///// <para>The count of children Music Segments of the Music Playlist Container.</para>
-        ///// </summary>
-        //public uint ChildCount { get; set; }
-
-        ///// <summary>
-        ///// <para>IDs of children Music Segments of the Music Playlist Container.</para>
-        ///// </summary>
-        //public uint[] ChildIds { get; set; }
 
         /// <summary>
         /// <para>The music grid duration of the Music Playlist Container, in milliseconds.</para>
@@ -89,9 +81,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Located at: Music Switch Container Property Editor > Transitions</para>
         /// </summary>
         public MusicTransition[] Transitions { get; set; }
-
+        
+        /// <summary>
+        /// <para>Count of entries in the Playlist of the Music Playlist Container.</para>
+        /// </summary>
         public uint PlaylistElementCount { get; set; }
 
+        /// <summary>
+        /// <para>The Playlist of the Music Playlist Container.</para>
+        /// </summary>
         public MusicPlaylistElement Playlist { get; set; }
 
         public override string Serialize()
@@ -99,13 +97,13 @@ namespace WwiseParserLib.Structures.Objects.HIRC
             var sb = new StringBuilder(base.Serialize());
             sb.AppendLine();
             sb.AppendLine("====== MUSIC PLAYLIST ======");
-            sb.Append(Playlist.Serialize());
+            sb.Append(Playlist.Serialize(Children));
             sb.AppendLine("============================");
             return sb.ToString();
         }
     }
 
-    public struct MusicPlaylistElement
+    public class MusicPlaylistElement
     {
         public uint SegmentId { get; set; }
 
@@ -131,14 +129,17 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public MusicPlaylistElement[] Children { get; set; }
 
-        public StringBuilder Serialize(StringBuilder sb = null, int depth = 0)
+        public StringBuilder Serialize(IReadOnlyCollection<Actor> childSegments, StringBuilder sb = null, int depth = 0)
         {
             sb ??= new StringBuilder();
             sb.Append("".Indent(depth));
             if (Type == MusicPlaylistElementType.MusicSegment)
             {
                 // Segment ID
-                sb.Append("Segment " + SegmentId.ToHex());
+                var segmentId = SegmentId;
+                var segment = childSegments.Single(s => s is MusicSegment && s.Id == segmentId);
+                sb.Append(segment.Serialize());
+                //sb.Append("Segment " + SegmentId.ToHex());
             }
             else
             {
@@ -164,10 +165,55 @@ namespace WwiseParserLib.Structures.Objects.HIRC
             }
             foreach (var child in Children)
             {
-                child.Serialize(sb, depth + 4);
+                child.Serialize(childSegments, sb, depth + 4);
             }
             return sb;
         }
+
+        public override string ToString()
+        {
+            var result = String.Empty;
+            if (Type == MusicPlaylistElementType.MusicSegment)
+            {
+                if (Segment != null)
+                {
+                    result += $"Segment, {Segment.Tempo} BPM, " +
+                        $"{Segment.TimeSignatureUpper}/{Segment.TimeSignatureLower}, "
+                        + Segment.ChildCount + " track"
+                        + (Segment.ChildCount > 1 ? "s" : "");
+                }
+                else
+                {
+                    result += "Segment (not found)";
+                }
+            }
+            else
+            {
+                result += Type;
+                if (IsShuffle)
+                {
+                    result += ", shuffle";
+                }
+            }
+            // Loop behavior
+            if (LoopCount == 1)
+            {
+                result += ", play once";
+            }
+            else if (LoopCount == 0)
+            {
+                result += ", loop infinitely";
+            }
+            else
+            {
+                result += ", loop " + LoopCount + " times";
+            }
+            return result;
+        }
+
+        #region Relationship
+        public MusicSegment Segment { get; set; }
+        #endregion
     }
 
     public enum MusicPlaylistElementType : uint

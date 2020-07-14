@@ -1,4 +1,5 @@
-﻿using WwiseParserLib.Structures.Objects.HIRC.Structs;
+﻿using System.Collections.Generic;
+using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -14,16 +15,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Location: Music Switch Container Property Editor > MIDI</para>
         /// </summary>
         public MusicMidiBehavior MidiBehavior { get; set; }
-
-        ///// <summary>
-        ///// <para>The count of children Music Tracks of the Music Switch Container.</para>
-        ///// </summary>
-        //public uint ChildCount { get; set; }
-
-        ///// <summary>
-        ///// <para>IDs of children Music Tracks of the Music Switch Container.</para>
-        ///// </summary>
-        //public uint[] ChildIds { get; set; }
 
         /// <summary>
         /// <para>The music grid duration of the Music Switch Container, in milliseconds.</para>
