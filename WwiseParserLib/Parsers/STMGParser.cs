@@ -4,13 +4,21 @@ using WwiseParserLib.Structures.Chunks;
 
 namespace WwiseParserLib.Parsers
 {
+    /// <summary>
+    /// Parser for STMG (state manager) chunks.
+    /// </summary>
     public static class STMGParser
     {
-        public static STMGSection Parse(byte[] blob)
+        /// <summary>
+        /// Parses a STMG chunk.
+        /// </summary>
+        /// <param name="blob">Chunk data to parse, without the leading type magic.</param>
+        /// <returns>The parsed chunk.</returns>
+        public static SoundBankStateManagerChunk Parse(byte[] blob)
         {
             using (var reader = new BinaryReader(new MemoryStream(blob)))
             {
-                var stmgSection = new STMGSection(blob.Length);
+                var stmgSection = new SoundBankStateManagerChunk(blob.Length);
                 stmgSection.VolumeThreshold = reader.ReadSingle();
                 stmgSection.MaxVoiceInstances = reader.ReadUInt16();
                 stmgSection.StateGroupCount = reader.ReadUInt32();

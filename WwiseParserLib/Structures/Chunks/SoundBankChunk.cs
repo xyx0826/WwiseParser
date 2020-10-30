@@ -72,7 +72,7 @@
 
         /// <summary>
         /// The SoundBank State Manager chunk.
-        /// Exists in Init.bnk. Contains Game Syncs.
+        /// Exists in Init.bnk. Contains project settings and Game Syncs.
         /// </summary>
         STMG = 0x474D5453
     }

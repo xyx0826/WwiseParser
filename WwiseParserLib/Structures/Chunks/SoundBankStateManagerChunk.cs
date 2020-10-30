@@ -2,9 +2,16 @@
 
 namespace WwiseParserLib.Structures.Chunks
 {
-    public class STMGSection : SoundBankChunk
+    /// <summary>
+    /// STMG chunk containing project settings and Game Syncs.
+    /// </summary>
+    public class SoundBankStateManagerChunk : SoundBankChunk
     {
-        public STMGSection(int length) : base (SoundBankChunkType.STMG, (uint)length)
+        /// <summary>
+        /// Creates a new STMG chunk.
+        /// </summary>
+        /// <param name="length">The data length of the chunk excluding the type magic.</param>
+        public SoundBankStateManagerChunk(int length) : base (SoundBankChunkType.STMG, (uint)length)
         {
 
         }
