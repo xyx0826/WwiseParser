@@ -4,7 +4,7 @@ using WwiseParserLib.Structures.Chunks;
 namespace WwiseParserLib.Parsers
 {
     /// <summary>
-    /// Parser for BKHD (SoundBank Header) chunks.
+    /// Parser for BKHD (header) chunks.
     /// </summary>
     public static class BKHDParser
     {

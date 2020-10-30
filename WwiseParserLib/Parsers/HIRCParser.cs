@@ -8,13 +8,21 @@ using WwiseParserLib.Structures.Chunks;
 
 namespace WwiseParserLib.Parsers
 {
+    /// <summary>
+    /// Parser for HIRC (hierarchy) chunks.
+    /// </summary>
     public static class HIRCParser
     {
-        public static HIRCSection Parse(byte[] blob)
+        /// <summary>
+        /// Parses a HIRC chunk.
+        /// </summary>
+        /// <param name="blob">Chunk data to parse, without the leading type magic.</param>
+        /// <returns>The parsed chunk.</returns>
+        public static SoundBankHierarchyChunk Parse(byte[] blob)
         {
             using (var reader = new BinaryReader(new MemoryStream(blob)))
             {
-                var hircSection = new HIRCSection(blob.Length);
+                var hircSection = new SoundBankHierarchyChunk(blob.Length);
                 hircSection.ObjectCount = reader.ReadUInt32();
                 hircSection.Objects = new HIRCObjectBase[hircSection.ObjectCount];
                 var objects = new Dictionary<byte, int>();

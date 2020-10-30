@@ -2,9 +2,16 @@
 
 namespace WwiseParserLib.Structures.Chunks
 {
-    public class HIRCSection : SoundBankChunk
+    /// <summary>
+    /// HIRC chunk containing the majority of Wwise objects.
+    /// </summary>
+    public class SoundBankHierarchyChunk : SoundBankChunk
     {
-        public HIRCSection(int length) : base(SoundBankChunkType.HIRC, (uint)length)
+        /// <summary>
+        /// Creates a new HIRC chunk.
+        /// </summary>
+        /// <param name="length">The data length of the chunk excluding the type magic.</param>
+        public SoundBankHierarchyChunk(int length) : base(SoundBankChunkType.HIRC, (uint)length)
         {
 
         }

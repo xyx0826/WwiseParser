@@ -113,7 +113,7 @@ namespace WwiseParserLib.Structures.SoundBanks
             }
 
             var hier = new MasterMixerHierarchy();
-            var buses = (hircSection as HIRCSection).Objects
+            var buses = (hircSection as SoundBankHierarchyChunk).Objects
                 .Where(o => o is AudioBus)
                 .Select(o => o as AudioBus);
             hier.AddBuses(buses);
@@ -137,7 +137,7 @@ namespace WwiseParserLib.Structures.SoundBanks
             }
 
             var hier = new ActorMixerHierarchy();
-            var actors = (hircSection as HIRCSection).Objects
+            var actors = (hircSection as SoundBankHierarchyChunk).Objects
                 .Where(o => o is Actor)
                 .Select(o => o as Actor);
             hier.AddActors(actors);
