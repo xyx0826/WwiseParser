@@ -2,9 +2,9 @@
 
 namespace WwiseParserLib.Structures.Chunks
 {
-    public class HIRCSection : SoundBankSection
+    public class HIRCSection : SoundBankChunk
     {
-        public HIRCSection(int length) : base(SoundBankSectionName.HIRC, (uint)length)
+        public HIRCSection(int length) : base(SoundBankChunkType.HIRC, (uint)length)
         {
 
         }

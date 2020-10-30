@@ -2,9 +2,9 @@
 
 namespace WwiseParserLib.Structures.Chunks
 {
-    public class STMGSection : SoundBankSection
+    public class STMGSection : SoundBankChunk
     {
-        public STMGSection(int length) : base (SoundBankSectionName.STMG, (uint)length)
+        public STMGSection(int length) : base (SoundBankChunkType.STMG, (uint)length)
         {
 
         }

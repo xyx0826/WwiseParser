@@ -12,7 +12,7 @@ namespace WwiseParserLib.Structures.SoundBanks
             FilePath = filePath;
         }
 
-        public override byte[] ReadSection(SoundBankSectionName name)
+        public override byte[] ReadSection(SoundBankChunkType name)
         {
             using (var reader = new BinaryReader(File.OpenRead(FilePath)))
             {

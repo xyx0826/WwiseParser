@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
-using WwiseParserLib.Parsers.BKHD;
-using WwiseParserLib.Parsers.HIRC;
-using WwiseParserLib.Parsers.STMG;
+using WwiseParserLib.Parsers;
 using WwiseParserLib.Structures.Hierarchies;
 using WwiseParserLib.Structures.Objects.HIRC;
 using WwiseParserLib.Structures.Chunks;
@@ -14,13 +12,13 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// <summary>
         /// All parsed sections of the current SoundBank.
         /// </summary>
-        protected SoundBankSection[] _parsedSections;
+        protected SoundBankChunk[] _parsedSections;
 
         protected SoundBank()
         {
             // Assume array will contain all sections
-            var sectionCount = Enum.GetValues(typeof(SoundBankSectionName)).Length;
-            _parsedSections = new SoundBankSection[sectionCount];
+            var sectionCount = Enum.GetValues(typeof(SoundBankChunkType)).Length;
+            _parsedSections = new SoundBankChunk[sectionCount];
         }
 
         /// <summary>
@@ -28,7 +26,7 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// </summary>
         /// <param name="name">The name of the section to read.</param>
         /// <returns>The data of the section.</returns>
-        public abstract byte[] ReadSection(SoundBankSectionName name);
+        public abstract byte[] ReadSection(SoundBankChunkType name);
 
         /// <summary>
         /// Parses the specified section.
@@ -36,10 +34,10 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// <param name="name">The name of the section to parse.</param>
         /// <returns>The parsed section, or null if one does not exist.</returns>
         /// <exception cref="NotImplementedException">
-        /// Thrown when a section other than <see cref="SoundBankSectionName.BKHD"/>,
-        /// <see cref="SoundBankSectionName.HIRC"/>, <see cref="SoundBankSectionName.STMG"/>
+        /// Thrown when a section other than <see cref="SoundBankChunkType.BKHD"/>,
+        /// <see cref="SoundBankChunkType.HIRC"/>, <see cref="SoundBankChunkType.STMG"/>
         /// is specified and exists, because their parsers are not implemented yet.</exception>
-        public SoundBankSection ParseSection(SoundBankSectionName name)
+        public SoundBankChunk ParseSection(SoundBankChunkType name)
         {
             var blob = ReadSection(name);
             if (blob == null)
@@ -49,13 +47,13 @@ namespace WwiseParserLib.Structures.SoundBanks
 
             switch (name)
             {
-                case SoundBankSectionName.BKHD:
+                case SoundBankChunkType.BKHD:
                     return BKHDParser.Parse(blob);
 
-                case SoundBankSectionName.HIRC:
+                case SoundBankChunkType.HIRC:
                     return HIRCParser.Parse(blob);
 
-                case SoundBankSectionName.STMG:
+                case SoundBankChunkType.STMG:
                     return STMGParser.Parse(blob);
 
                 default:
@@ -70,13 +68,13 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// <returns>The parsed specified section, or null if one does not exist.</returns>
         /// <exception cref="NotImplementedException">
         /// Thrown when an unsupported section name is specified.
-        /// See <see cref="ParseSection(SoundBankSectionName)"/>.</exception>
-        public SoundBankSection GetSection(SoundBankSectionName name)
+        /// See <see cref="ParseSection(SoundBankChunkType)"/>.</exception>
+        public SoundBankChunk GetSection(SoundBankChunkType name)
         {
             // Is it already parsed?
             // The index of the section in all sections
             var sectionIdx = Array.IndexOf(
-                Enum.GetValues(typeof(SoundBankSectionName)), name);
+                Enum.GetValues(typeof(SoundBankChunkType)), name);
             var section = _parsedSections[sectionIdx];
             if (section == null)
             {
@@ -107,7 +105,7 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// Thrown when a HIRC section does not exist.</exception>
         public MasterMixerHierarchy CreateMasterMixerHierarchy()
         {
-            var hircSection = GetSection(SoundBankSectionName.HIRC);
+            var hircSection = GetSection(SoundBankChunkType.HIRC);
             if (hircSection == null)
             {
                 throw new InvalidOperationException(
@@ -130,7 +128,7 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// Thrown when a HIRC section does not exist.</exception>
         public ActorMixerHierarchy CreateActorMixerHierarchy()
         {
-            var hircSection = GetSection(SoundBankSectionName.HIRC);
+            var hircSection = GetSection(SoundBankChunkType.HIRC);
             if (hircSection == null)
             {
                 //throw new InvalidOperationException(

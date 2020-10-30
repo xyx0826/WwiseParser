@@ -2,7 +2,7 @@
 using WwiseParserLib.Structures.Objects.STMG;
 using WwiseParserLib.Structures.Chunks;
 
-namespace WwiseParserLib.Parsers.STMG
+namespace WwiseParserLib.Parsers
 {
     public static class STMGParser
     {
