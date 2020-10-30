@@ -2,9 +2,9 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicSegment : Actor
+    public class MusicSegment : Music
     {
-        public MusicSegment(int length) : base(HIRCObjectType.MusicSegment, (uint)length)
+        public MusicSegment(int length) : base(HIRCObjectType.MusicSegment, length)
         {
 
         }
@@ -27,24 +27,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Determined by: Music Segment Property Editor > General Settings > Time Settings > Grid > Offset</para>
         /// </summary>
         public double GridOffsetTime { get; set; }
-
-        /// <summary>
-        /// <para>The tempo (BPM) of the Music Segment.</para>
-        /// <para>Located at: Music Segment Property Editor > General Settings > Time Settings > Tempo</para>
-        /// </summary>
-        public float Tempo { get; set; }
-
-        /// <summary>
-        /// <para>The upper part of the time signature of the Music Segment.</para>
-        /// <para>Located at: Music Segment Property Editor > General Settings > Time Settings > Time Signature</para>
-        /// </summary>
-        public byte TimeSignatureUpper { get; set; }
-
-        /// <summary>
-        /// <para>The lower part of the time signature of the Music Segment.</para>
-        /// <para>Located at: Music Segment Property Editor > General Settings > Time Settings > Time Signature</para>
-        /// </summary>
-        public byte TimeSignatureLower { get; set; }
 
         /// <summary>
         /// Unknown byte. Appears to always be 0xFF.

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicPlaylistContainer : Actor
+    public class MusicPlaylistContainer : Music
     {
-        public MusicPlaylistContainer(int length) : base(HIRCObjectType.MusicPlaylistContainer, (uint)length)
+        public MusicPlaylistContainer(int length) : base(HIRCObjectType.MusicPlaylistContainer, length)
         {
 
         }
@@ -32,24 +31,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Determined by: Music Playlist Container Property Editor > General Settings > Time Settings > Grid > Offset</para>
         /// </summary>
         public double GridOffsetTime { get; set; }
-
-        /// <summary>
-        /// <para>The tempo (BPM) of the Music Playlist Container.</para>
-        /// <para>Located at: Music Playlist Container Property Editor > General Settings > Time Settings > Tempo</para>
-        /// </summary>
-        public float Tempo { get; set; }
-
-        /// <summary>
-        /// <para>The upper part of the time signature of the Music Playlist Container.</para>
-        /// <para>Located at: Music Playlist Container Property Editor > General Settings > Time Settings > Time Signature</para>
-        /// </summary>
-        public byte TimeSignatureUpper { get; set; }
-
-        /// <summary>
-        /// <para>The lower part of the time signature of the Music Playlist Container.</para>
-        /// <para>Located at: Music Playlist Container Property Editor > General Settings > Time Settings > Time Signature</para>
-        /// </summary>
-        public byte TimeSignatureLower { get; set; }
 
         /// <summary>
         /// Unknown byte. Appears to always be 0x01.

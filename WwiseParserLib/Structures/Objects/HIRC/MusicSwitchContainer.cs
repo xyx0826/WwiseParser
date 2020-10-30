@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using WwiseParserLib.Structures.Objects.HIRC.Structs;
+﻿using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicSwitchContainer : Actor
+    public class MusicSwitchContainer : Music
     {
-        public MusicSwitchContainer(int length) : base(HIRCObjectType.MusicSwitchContainer, (uint)length)
+        public MusicSwitchContainer(int length) : base(HIRCObjectType.MusicSwitchContainer, length)
         {
 
         }
@@ -28,24 +27,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// <para>Determined by: Music Switch Container Property Editor > General Settings > Time Settings > Grid > Offset</para>
         /// </summary>
         public double GridOffsetTime { get; set; }
-
-        /// <summary>
-        /// <para>The tempo (BPM) of the Music Switch Container.</para>
-        /// <para>Located at: Music Switch Container Property Editor > General Settings > Time Settings > Tempo</para>
-        /// </summary>
-        public float Tempo { get; set; }
-
-        /// <summary>
-        /// <para>The upper part of the time signature of the Music Switch Container.</para>
-        /// <para>Located at: Music Switch Container Property Editor > General Settings > Time Settings > Time Signature</para>
-        /// </summary>
-        public byte TimeSignatureUpper { get; set; }
-
-        /// <summary>
-        /// <para>The lower part of the time signature of the Music Switch Container.</para>
-        /// <para>Located at: Music Switch Container Property Editor > General Settings > Time Settings > Time Signature</para>
-        /// </summary>
-        public byte TimeSignatureLower { get; set; }
 
         /// <summary>
         /// Unknown byte. Appears to always be 0x01.

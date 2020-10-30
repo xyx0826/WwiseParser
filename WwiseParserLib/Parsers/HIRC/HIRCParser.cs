@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using WwiseParserLib.Structures.Objects.HIRC;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
 using WwiseParserLib.Structures.Sections;
