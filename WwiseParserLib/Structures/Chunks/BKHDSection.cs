@@ -1,4 +1,4 @@
-﻿namespace WwiseParserLib.Structures.Sections
+﻿namespace WwiseParserLib.Structures.Chunks
 {
     public class BKHDSection : SoundBankSection
     {

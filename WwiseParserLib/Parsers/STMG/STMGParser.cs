@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using WwiseParserLib.Structures.Objects.STMG;
-using WwiseParserLib.Structures.Sections;
+using WwiseParserLib.Structures.Chunks;
 
 namespace WwiseParserLib.Parsers.STMG
 {

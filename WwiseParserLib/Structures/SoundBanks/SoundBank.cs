@@ -5,7 +5,7 @@ using WwiseParserLib.Parsers.HIRC;
 using WwiseParserLib.Parsers.STMG;
 using WwiseParserLib.Structures.Hierarchies;
 using WwiseParserLib.Structures.Objects.HIRC;
-using WwiseParserLib.Structures.Sections;
+using WwiseParserLib.Structures.Chunks;
 
 namespace WwiseParserLib.Structures.SoundBanks
 {

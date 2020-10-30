@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using WwiseParserLib.Structures.Objects.HIRC;
 using WwiseParserLib.Structures.Objects.HIRC.Structs;
-using WwiseParserLib.Structures.Sections;
+using WwiseParserLib.Structures.Chunks;
 
 namespace WwiseParserLib.Parsers.HIRC
 {

@@ -1,6 +1,6 @@
 ﻿using WwiseParserLib.Structures.Objects.HIRC;
 
-namespace WwiseParserLib.Structures.Sections
+namespace WwiseParserLib.Structures.Chunks
 {
     public class HIRCSection : SoundBankSection
     {

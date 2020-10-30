@@ -1,6 +1,6 @@
 ﻿using WwiseParserLib.Structures.Objects.STMG;
 
-namespace WwiseParserLib.Structures.Sections
+namespace WwiseParserLib.Structures.Chunks
 {
     public class STMGSection : SoundBankSection
     {

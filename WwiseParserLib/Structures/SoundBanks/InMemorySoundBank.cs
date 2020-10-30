@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using WwiseParserLib.Structures.Sections;
+using WwiseParserLib.Structures.Chunks;
 
 namespace WwiseParserLib.Structures.SoundBanks
 {

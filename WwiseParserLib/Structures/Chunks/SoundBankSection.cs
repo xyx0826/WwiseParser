@@ -1,4 +1,4 @@
-﻿namespace WwiseParserLib.Structures.Sections
+﻿namespace WwiseParserLib.Structures.Chunks
 {
     /// <summary>
     /// Base class representing a Wwise SoundBank section.
