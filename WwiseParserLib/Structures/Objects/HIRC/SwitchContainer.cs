@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class SwitchContainer : Actor
+    public class SwitchContainer : SoundObject
     {
         public SwitchContainer(int length) : base(HIRCObjectType.SwitchContainer, (uint)length)
         {

@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Container : Actor
+    public class Container : SoundObject
     {
         public Container(int length) : base(HIRCObjectType.Container, (uint)length)
         {
@@ -63,16 +63,6 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public ContainerPlayType PlayType { get; set; }
 
         public ContainerSequenceBehavior Behavior { get; set; }
-
-        ///// <summary>
-        ///// <para>The count of children of the Random Container.</para>
-        ///// </summary>
-        //public uint ChildCount { get; set; }
-
-        ///// <summary>
-        ///// <para>IDs of children of the Random Container.</para>
-        ///// </summary>
-        //public uint[] ChildIds { get; set; }
 
         /// <summary>
         /// Unknown count.

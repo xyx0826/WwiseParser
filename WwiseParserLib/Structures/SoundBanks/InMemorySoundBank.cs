@@ -12,7 +12,7 @@ namespace WwiseParserLib.Structures.SoundBanks
             _blob = blob;
         }
 
-        public override byte[] ReadSection(SoundBankChunkType name)
+        public override byte[] ReadChunkBlob(SoundBankChunkType name)
         {
             using (var reader = new BinaryReader(new MemoryStream(_blob)))
             {

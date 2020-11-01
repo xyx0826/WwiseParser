@@ -2,7 +2,7 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class Sound : Actor
+    public class Sound : SoundObject
     {
         public Sound(int length) : base(HIRCObjectType.Sound, (uint)length)
         {

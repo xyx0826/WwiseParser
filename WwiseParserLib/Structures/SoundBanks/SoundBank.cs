@@ -10,36 +10,32 @@ namespace WwiseParserLib.Structures.SoundBanks
     public abstract class SoundBank
     {
         /// <summary>
-        /// All parsed sections of the current SoundBank.
+        /// All parsed chunks of the current SoundBank.
         /// </summary>
-        protected SoundBankChunk[] _parsedSections;
+        protected SoundBankChunk[] _parsedChunks;
 
         protected SoundBank()
         {
-            // Assume array will contain all sections
-            var sectionCount = Enum.GetValues(typeof(SoundBankChunkType)).Length;
-            _parsedSections = new SoundBankChunk[sectionCount];
+            // Assume array will contain all chunks
+            var chunkCount = Enum.GetValues(typeof(SoundBankChunkType)).Length;
+            _parsedChunks = new SoundBankChunk[chunkCount];
         }
 
         /// <summary>
-        /// Reads the binary data of the specified section.
+        /// Reads the binary data of the specified chunk.
         /// </summary>
-        /// <param name="name">The name of the section to read.</param>
-        /// <returns>The data of the section.</returns>
-        public abstract byte[] ReadSection(SoundBankChunkType name);
+        /// <param name="name">The name of the chunk to read.</param>
+        /// <returns>The data of the chunk.</returns>
+        public abstract byte[] ReadChunkBlob(SoundBankChunkType name);
 
         /// <summary>
-        /// Parses the specified section.
+        /// Parses the specified chunk.
         /// </summary>
-        /// <param name="name">The name of the section to parse.</param>
-        /// <returns>The parsed section, or null if one does not exist.</returns>
-        /// <exception cref="NotImplementedException">
-        /// Thrown when a section other than <see cref="SoundBankChunkType.BKHD"/>,
-        /// <see cref="SoundBankChunkType.HIRC"/>, <see cref="SoundBankChunkType.STMG"/>
-        /// is specified and exists, because their parsers are not implemented yet.</exception>
-        public SoundBankChunk ParseSection(SoundBankChunkType name)
+        /// <param name="name">The name of the chunk to parse.</param>
+        /// <returns>The parsed chunk, or null if the specified chunk is unsupported or does not exist.</returns>
+        public SoundBankChunk ParseChunk(SoundBankChunkType name)
         {
-            var blob = ReadSection(name);
+            var blob = ReadChunkBlob(name);
             if (blob == null)
             {
                 return null;
@@ -57,63 +53,62 @@ namespace WwiseParserLib.Structures.SoundBanks
                     return STMGParser.Parse(blob);
 
                 default:
-                    throw new NotImplementedException();
+                    return null;
             }
         }
 
         /// <summary>
-        /// Gets the parsed specified section from the current SoundBank.
+        /// Gets the parsed specified chunk from the current SoundBank.
         /// </summary>
-        /// <param name="name">The name of the section.</param>
-        /// <returns>The parsed specified section, or null if one does not exist.</returns>
+        /// <param name="name">The name of the chunk.</param>
+        /// <returns>The parsed specified chunk, or null if one does not exist.</returns>
         /// <exception cref="NotImplementedException">
-        /// Thrown when an unsupported section name is specified.
-        /// See <see cref="ParseSection(SoundBankChunkType)"/>.</exception>
-        public SoundBankChunk GetSection(SoundBankChunkType name)
+        /// Thrown when an unsupported chunk name is specified.
+        /// See <see cref="ParseChunk(SoundBankChunkType)"/>.</exception>
+        public SoundBankChunk GetChunk(SoundBankChunkType name)
         {
             // Is it already parsed?
-            // The index of the section in all sections
-            var sectionIdx = Array.IndexOf(
+            // The index of the chunk in all chunks
+            var chunkAt = Array.IndexOf(
                 Enum.GetValues(typeof(SoundBankChunkType)), name);
-            var section = _parsedSections[sectionIdx];
-            if (section == null)
+            var chunk = _parsedChunks[chunkAt];
+            if (chunk == null)
             {
-                if ((section = ParseSection(name)) == null)
+                // Chunk not already parsed, try parsing it now
+                if ((chunk = ParseChunk(name)) == null)
                 {
-                    // Section does not exist
+                    // Chunk does not exist
                     return null;
                 }
                 else
                 {
-                    // Save parsed section and return
-                    _parsedSections[sectionIdx] = section;
-                    return section;
+                    // Save parsed chunk and return
+                    _parsedChunks[chunkAt] = chunk;
+                    return chunk;
                 }
             }
             else
             {
-                // Return already parsed section
-                return section;
+                // Return already parsed chunk
+                return chunk;
             }
         }
 
         /// <summary>
         /// Creates a Master-Mixer Hierarchy from the current SoundBank.
         /// </summary>
-        /// <returns>The parsed and rebuilt hierarchy.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when a HIRC section does not exist.</exception>
+        /// <returns>The parsed and rebuilt hierarchy, or null
+        /// if the current SoundBank doesn't have a HIRC chunk.</returns>
         public MasterMixerHierarchy CreateMasterMixerHierarchy()
         {
-            var hircSection = GetSection(SoundBankChunkType.HIRC);
-            if (hircSection == null)
+            var hirc = GetChunk(SoundBankChunkType.HIRC);
+            if (hirc == null)
             {
-                throw new InvalidOperationException(
-                    "The SoundBank does not have a HIRC section.");
+                return null;
             }
 
             var hier = new MasterMixerHierarchy();
-            var buses = (hircSection as SoundBankHierarchyChunk).Objects
+            var buses = (hirc as SoundBankHierarchyChunk).Objects
                 .Where(o => o is AudioBus)
                 .Select(o => o as AudioBus);
             hier.AddBuses(buses);
@@ -123,24 +118,42 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// <summary>
         /// Creates an Actor-Mixer hierarchy from the current SoundBank.
         /// </summary>
-        /// <returns>The parsed and rebuilt hierarchy.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when a HIRC section does not exist.</exception>
+        /// <returns>The parsed and rebuilt hierarchy, or null
+        /// if the current SoundBank doesn't have a HIRC chunk.</returns>
         public ActorMixerHierarchy CreateActorMixerHierarchy()
         {
-            var hircSection = GetSection(SoundBankChunkType.HIRC);
-            if (hircSection == null)
+            var hirc = GetChunk(SoundBankChunkType.HIRC);
+            if (hirc == null)
             {
-                //throw new InvalidOperationException(
-                //    "The SoundBank does not have a HIRC section.");
                 return null;
             }
 
             var hier = new ActorMixerHierarchy();
-            var actors = (hircSection as SoundBankHierarchyChunk).Objects
-                .Where(o => o is Actor)
-                .Select(o => o as Actor);
-            hier.AddActors(actors);
+            var actors = (hirc as SoundBankHierarchyChunk).Objects
+                .Where(o => o is SoundObject)
+                .Select(o => o as SoundObject);
+            hier.LoadSoundObjects(actors);
+            return hier;
+        }
+
+        /// <summary>
+        /// Creates an Interactive Music Hierarchy from the current SoundBank.
+        /// </summary>
+        /// <returns>The parsed and rebuilt hierarchy, or null
+        /// if the current SoundBank doesn't have a HIRC chunk.</returns>
+        public InteractiveMusicHierarchy CreateInteractiveMusicHierarchy()
+        {
+            var hirc = GetChunk(SoundBankChunkType.HIRC);
+            if (hirc == null)
+            {
+                return null;
+            }
+
+            var hier = new InteractiveMusicHierarchy();
+            var musicObjs = (hirc as SoundBankHierarchyChunk).Objects
+                .Where(o => o is MusicObject)
+                .Select(o => o as MusicObject);
+            hier.LoadMusicObjects(musicObjs);
             return hier;
         }
     }

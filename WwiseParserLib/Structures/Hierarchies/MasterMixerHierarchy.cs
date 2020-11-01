@@ -6,7 +6,7 @@ using WwiseParserLib.Structures.Objects.HIRC;
 namespace WwiseParserLib.Structures.Hierarchies
 {
     /// <summary>
-    /// Represents a Wwise Master-Mixer Hierarchy.
+    /// A Wwise Master-Mixer Hierarchy.
     /// </summary>
     public class MasterMixerHierarchy
     {

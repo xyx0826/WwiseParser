@@ -4,7 +4,7 @@ using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicTrack : Actor
+    public class MusicTrack : MusicObject
     {
         public MusicTrack(int length) : base(HIRCObjectType.MusicTrack, (uint)length)
         {

@@ -6,9 +6,9 @@ using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicPlaylistContainer : Music
+    public class MusicPlaylistContainer : MusicObject
     {
-        public MusicPlaylistContainer(int length) : base(HIRCObjectType.MusicPlaylistContainer, length)
+        public MusicPlaylistContainer(int length) : base(HIRCObjectType.MusicPlaylistContainer, (uint)length)
         {
 
         }
@@ -78,7 +78,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
             var sb = new StringBuilder(base.Serialize());
             sb.AppendLine();
             sb.AppendLine("====== MUSIC PLAYLIST ======");
-            sb.Append(Playlist.Serialize(Children));
+            sb.Append(Playlist.Serialize(_children));
             sb.AppendLine("============================");
             return sb.ToString();
         }
@@ -110,7 +110,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public MusicPlaylistElement[] Children { get; set; }
 
-        public StringBuilder Serialize(IReadOnlyCollection<Actor> childSegments, StringBuilder sb = null, int depth = 0)
+        public StringBuilder Serialize(IList<MusicObject> childSegments, StringBuilder sb = null, int depth = 0)
         {
             sb ??= new StringBuilder();
             sb.Append("".Indent(depth));

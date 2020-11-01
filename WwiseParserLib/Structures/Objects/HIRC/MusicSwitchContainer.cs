@@ -2,9 +2,9 @@
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
-    public class MusicSwitchContainer : Music
+    public class MusicSwitchContainer : MusicObject
     {
-        public MusicSwitchContainer(int length) : base(HIRCObjectType.MusicSwitchContainer, length)
+        public MusicSwitchContainer(int length) : base(HIRCObjectType.MusicSwitchContainer, (uint)length)
         {
 
         }

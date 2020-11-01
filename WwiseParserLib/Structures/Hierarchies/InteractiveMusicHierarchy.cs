@@ -7,15 +7,15 @@ using WwiseParserLib.Structures.Objects.HIRC;
 namespace WwiseParserLib.Structures.Hierarchies
 {
     /// <summary>
-    /// A Wwise Actor-Mixer Hierarchy.
+    /// A Wwise Interactive Music Hierarchy.
     /// </summary>
-    public class ActorMixerHierarchy
+    public class InteractiveMusicHierarchy
     {
         /// <summary>
         /// All unconnected objects in the hierarchy.
         /// The key is the parent ID; the values are objects sharing the parent.
         /// </summary>
-        private ILookup<uint, SoundObject> _subtrees;
+        private ILookup<uint, MusicObject> _subtrees;
 
         /// <summary>
         /// Whether the hierarchy is already loaded.
@@ -25,16 +25,16 @@ namespace WwiseParserLib.Structures.Hierarchies
         /// <summary>
         /// All connected objects in the hierarchy.
         /// </summary>
-        private IList<SoundObject> _hierarchy;
+        private IList<MusicObject> _hierarchy;
 
         /// <summary>
         /// All connected objects in the hierarchy.
         /// </summary>
-        public IReadOnlyList<SoundObject> Hierarchy
+        public IReadOnlyList<MusicObject> Hierarchy
         {
             get
             {
-                if (_hierarchy is List<SoundObject> l)
+                if (_hierarchy is List<MusicObject> l)
                 {
                     return l.AsReadOnly();
                 }
@@ -44,14 +44,14 @@ namespace WwiseParserLib.Structures.Hierarchies
                 }
             }
         }
-        
+
         /// <summary>
-        /// Rebuilds the hierarchy with the specified collection of Sound Objects.
+        /// Rebuilds the hierarchy with the specified collection of Music Objects.
         /// </summary>
-        /// <param name="objs">The collection of Sound Objects.</param>
+        /// <param name="objs">The collection of Music Objects.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the hierarchy is already loaded.</exception>
-        public void LoadSoundObjects(IEnumerable<SoundObject> objs)
+        public void LoadMusicObjects(IEnumerable<MusicObject> objs)
         {
             if (_loaded)
             {
@@ -60,10 +60,10 @@ namespace WwiseParserLib.Structures.Hierarchies
 
             // Group objects by parent IDs
             _subtrees = objs.ToLookup(o => o.Properties.ParentId, o => o);
-            _hierarchy = GetTopLevelSoundObjects(_subtrees);
-            foreach (var soundObject in _hierarchy)
+            _hierarchy = GetTopLevelMusicObjects(_subtrees);
+            foreach (var MusicObject in _hierarchy)
             {
-                LinkChildren(soundObject);
+                LinkChildren(MusicObject);
             }
 
             _subtrees = null;
@@ -71,10 +71,10 @@ namespace WwiseParserLib.Structures.Hierarchies
         }
 
         /// <summary>
-        /// Recursively links children of the specified Sound Object.
+        /// Recursively links children of the specified Music Object.
         /// </summary>
-        /// <param name="o">The Sound Object to link children for.</param>
-        private void LinkChildren(SoundObject o)
+        /// <param name="o">The Music Object to link children for.</param>
+        private void LinkChildren(MusicObject o)
         {
             if (_subtrees.Contains(o.Id))
             {
@@ -93,20 +93,20 @@ namespace WwiseParserLib.Structures.Hierarchies
         public string Serialize()
         {
             var sb = new StringBuilder();
-            foreach (var soundObject in _hierarchy)
+            foreach (var MusicObject in _hierarchy)
             {
                 // Serialize every top-level object
-                SerializeActor(sb, 0, soundObject);
+                SerializeActor(sb, 0, MusicObject);
             }
             return sb.ToString();
         }
 
         /// <summary>
-        /// Returns all top-level Sound Objects or those without a reachable parent.
+        /// Returns all top-level Music Objects or those without a reachable parent.
         /// </summary>
-        /// <param name="subtrees">A lookup of parent IDs to child Sound Objects of those IDs.</param>
-        /// <returns>A list of all top-level Sound Objects or those without a reachable parent.</returns>
-        private static IList<SoundObject> GetTopLevelSoundObjects(ILookup<uint, SoundObject> subtrees)
+        /// <param name="subtrees">A lookup of parent IDs to child Music Objects of those IDs.</param>
+        /// <returns>A list of all top-level Music Objects or those without a reachable parent.</returns>
+        private static IList<MusicObject> GetTopLevelMusicObjects(ILookup<uint, MusicObject> subtrees)
         {
             if (subtrees == null)
             {
@@ -125,7 +125,7 @@ namespace WwiseParserLib.Structures.Hierarchies
         /// <param name="sb">The result <see cref="StringBuilder"/>.</param>
         /// <param name="depth">The indentation level.</param>
         /// <param name="o">The object to serialize.</param>
-        private static void SerializeActor(StringBuilder sb, int depth, SoundObject o)
+        private static void SerializeActor(StringBuilder sb, int depth, MusicObject o)
         {
             // Serialize current object
             sb.AppendLine(o.Serialize().IndentLines(depth));
