@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 
 namespace WwiseParser
@@ -17,8 +16,8 @@ namespace WwiseParser
                 Output("\t--inspector (-i):\tdump HIRC objects, including unparsed blobs, separately for inspection");
                 Output("\t--actor-mixer-hierarchy (-amh): dump the actor-mixer hierarchy");
                 Output("\t--master-mixer-hierarchy (-mmh): dump the master-mixer hierarchy");
-                Output("\t--no-stmg (-ns):\tskip STMG section");
-                Output("\t--no-hirc (-nh):\tskip HIRC section");
+                Output("\t--no-stmg (-ns):\tskip STMG (State Manager) chunk, found in Init.bnk");
+                Output("\t--no-hirc (-nh):\tskip HIRC (Hierarchy) chunk, found in typical SoundBanks");
                 Output("build 20200419. partial EventAction support");
                 return;
             }
@@ -29,23 +28,11 @@ namespace WwiseParser
                 args.HasSwitch("no-hirc", "nh"),
                 args.HasSwitch("inspector", "i"));
             parser.Parse();
-
-            // crappy code
-            var fileName = Path.GetFileNameWithoutExtension(args[0]);
-            var hier = parser.SoundBank.CreateActorMixerHierarchy();
-            File.WriteAllText("amh_" + fileName + ".txt", hier.Serialize());
         }
 
         static void Output(string value)
         {
-            //if (Debugger.IsAttached)
-            //{
-            //    Debug.WriteLine(value);
-            //}
-            //else
-            //{
-                Console.WriteLine(value);
-            //}
+            Console.WriteLine(value);
         }
     }
 }

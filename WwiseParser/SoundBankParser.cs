@@ -5,14 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using WwiseParserLib.Structures.Chunks;
 using WwiseParserLib.Structures.Objects.HIRC;
-using WwiseParserLib.Structures.Sections;
 using WwiseParserLib.Structures.SoundBanks;
 
 namespace WwiseParser
 {
     /// <summary>
-    /// A parser responsible for parsing sections of a SoundBank.
+    /// A parser responsible for parsing chunks of a SoundBank.
     /// </summary>
     class SoundBankParser
     {
@@ -49,8 +49,8 @@ namespace WwiseParser
         /// Creates a new parser for a file-based SoundBank.
         /// </summary>
         /// <param name="filePath">The path to the SoundBank file.</param>
-        /// <param name="skipSTMG">Whether to skip STMG section.</param>
-        /// <param name="skipHIRC">Whether to skip HIRC section.</param>
+        /// <param name="skipSTMG">Whether to skip STMG chunk.</param>
+        /// <param name="skipHIRC">Whether to skip HIRC chunk.</param>
         /// <param name="isInspector">Whether to parse in inspector mode.</param>
         public SoundBankParser(string filePath, bool skipSTMG, bool skipHIRC, bool isInspector) : this()
         {
@@ -63,39 +63,39 @@ namespace WwiseParser
         }
 
         /// <summary>
-        /// Parses the SoundBank and dumps parsed sections to JSON files.
+        /// Parses the SoundBank and dumps parsed chunks to JSON files.
         /// </summary>
         public void Parse()
         {
-            SoundBankSection section;
+            SoundBankChunk chunk;
             if (_parseHirc)
             {
-                section = SoundBank.GetSection(SoundBankSectionName.HIRC);
+                chunk = SoundBank.GetChunk(SoundBankChunkType.HIRC);
                 if (_isInspector)
                 {
-                    ParseHIRCInspector(section as HIRCSection);
+                    ParseHIRCInspector(chunk as SoundBankHierarchyChunk);
                 }
                 else
                 {
-                    WriteJson(section, "hirc");
+                    WriteJson(chunk, "hirc");
                 }
             }
 
             if (_parseStmg)
             {
-                section = SoundBank.GetSection(SoundBankSectionName.STMG);
-                WriteJson(section, "stmg");
+                chunk = SoundBank.GetChunk(SoundBankChunkType.STMG);
+                WriteJson(chunk, "stmg");
             }
         }
 
         /// <summary>
-        /// Parses the HIRC section in inspector mode,
+        /// Parses the HIRC chunk in inspector mode,
         /// dumping documented Wwise objects to JSON files and undocumented ones to binary files.
         /// </summary>
-        /// <param name="hircSection">The HIRC section to parse.</param>
-        private void ParseHIRCInspector(HIRCSection hircSection)
+        /// <param name="hirc">The HIRC chunk to parse.</param>
+        private void ParseHIRCInspector(SoundBankHierarchyChunk hirc)
         {
-            var types = hircSection.Objects.GroupBy(x => x.Type);
+            var types = hirc.Objects.GroupBy(x => x.Type);
             foreach (var type in types)
             {
                 // Append type ID to type name if unknown
@@ -144,7 +144,7 @@ namespace WwiseParser
         #region Helpers
         /// <summary>
         /// Creates the SoundBank object from the specified file path
-        /// and validates that the file is a SoundBank with a BKHD section.
+        /// and validates that the file is a SoundBank with a BKHD chunk.
         /// </summary>
         /// <param name="filePath">The path to the SoundBank.</param>
         private void ValidateSoundBank(string filePath)
@@ -156,8 +156,8 @@ namespace WwiseParser
 
             // Check for BKHD header
             SoundBank = new FileSoundBank(filePath);
-            var bkhdSection = SoundBank.ParseSection(SoundBankSectionName.BKHD);
-            if (bkhdSection == null)
+            var bkhd = SoundBank.ParseChunk(SoundBankChunkType.BKHD);
+            if (bkhd == null)
             {
                 throw new Exception("The specified file does not have a valid SoundBank header.");
             }
