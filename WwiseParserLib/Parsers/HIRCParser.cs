@@ -867,6 +867,219 @@ namespace WwiseParserLib.Parsers
             }
         }
 
+        private static AudioProperties ReadAudioProperties2013(this BinaryReader reader)
+        {
+            var audioProperties = new AudioProperties();
+            audioProperties.OverrideEffects = reader.ReadBoolean();
+            audioProperties.EffectCount = reader.ReadByte();
+            if (audioProperties.EffectCount > 0)
+            {
+                audioProperties.BypassedEffects = (AudioBypassedEffects)reader.ReadByte();
+            }
+            audioProperties.Effects = new AudioEffect[audioProperties.EffectCount];
+            for (var i = 0; i < audioProperties.EffectCount; i++)
+            {
+                AudioEffect effect = default;
+                effect.Index = reader.ReadByte();
+                effect.Id = reader.ReadUInt32();
+                effect.ShouldUseShareSets = reader.ReadBoolean();
+                effect.IsRendered = reader.ReadBoolean();
+                audioProperties.Effects[i] = effect;
+            }
+            audioProperties.OutputBusId = reader.ReadUInt32();
+            audioProperties.ParentId = reader.ReadUInt32();
+            var overridePlaybackPriority = reader.ReadBoolean() ? AudioPlaybackBehavior.OverridePlaybackPriority : 0;
+            var offsetPriority = reader.ReadBoolean() ? AudioPlaybackBehavior.OffsetPlaybackPriority : 0;
+            audioProperties.PlaybackBehavior = overridePlaybackPriority | offsetPriority;
+            audioProperties.ParameterCount = reader.ReadByte();
+            audioProperties.ParameterTypes = new AudioParameterType[audioProperties.ParameterCount];
+            for (var i = 0; i < audioProperties.ParameterCount; i++)
+            {
+                audioProperties.ParameterTypes[i] = (AudioParameterType)reader.ReadByte();
+            }
+            audioProperties.ParameterValues = new ValueType[audioProperties.ParameterCount];
+            for (var i = 0; i < audioProperties.ParameterCount; i++)
+            {
+                var parameterType = audioProperties.ParameterTypes[i].ToString();
+                if (parameterType.EndsWith("_UInt"))
+                {
+                    audioProperties.ParameterValues[i] = reader.ReadUInt32();
+                }
+                else if (parameterType.EndsWith("_Int"))
+                {
+                    audioProperties.ParameterValues[i] = reader.ReadInt32();
+                }
+                else
+                {
+                    audioProperties.ParameterValues[i] = reader.ReadSingle();
+                }
+            }
+            audioProperties.ParameterPairCount = reader.ReadByte();
+            audioProperties.ParameterPairTypes = new byte[audioProperties.ParameterPairCount];
+            for (var i = 0; i < audioProperties.ParameterPairCount; i++)
+            {
+                audioProperties.ParameterPairTypes[i] = reader.ReadByte();
+            }
+            audioProperties.ParameterPairValues = new AudioParameterPair[audioProperties.ParameterPairCount];
+            for (var i = 0; i < audioProperties.ParameterPairCount; i++)
+            {
+                AudioParameterPair audioParameterPair = default;
+                audioParameterPair.Parameter_1 = reader.ReadSingle();
+                audioParameterPair.Parameter_2 = reader.ReadSingle();
+                audioProperties.ParameterPairValues[i] = audioParameterPair;
+            }
+
+            // Read Positioning settings: merge booleans into a single flag
+            AudioPositioningBehavior overridePositioning, twoDimensional, enablePanner, enableSpatialization, updateAtEachFrame, userDefinedShouldLoop, ignoreListenerOrientation;
+            overridePositioning = twoDimensional = enablePanner = enableSpatialization = updateAtEachFrame = userDefinedShouldLoop = ignoreListenerOrientation = 0;
+            overridePositioning = reader.ReadBoolean() ? AudioPositioningBehavior.OverrideParent : 0;
+            if (overridePositioning > 0)
+            {
+                twoDimensional = reader.ReadBoolean() ? AudioPositioningBehavior.TwoDimensional : 0;
+                if (twoDimensional > 0)
+                {
+                    reader.BaseStream.Position++;
+                    enablePanner = reader.ReadBoolean() ? AudioPositioningBehavior.Enable2dPanner : 0;
+                }
+                else
+                {
+                    reader.BaseStream.Position++;
+                    audioProperties.IsGameDefined = reader.ReadUInt32() == 1;
+                    audioProperties.AttenuationId = reader.ReadUInt32();
+                    enableSpatialization = reader.ReadBoolean() ? AudioPositioningBehavior.EnableSpatialization : 0;
+                    if (audioProperties.IsGameDefined)
+                    {
+                        updateAtEachFrame = reader.ReadBoolean() ? AudioPositioningBehavior.UpdateAtEachFrame : 0;
+                    }
+                    else
+                    {
+                        audioProperties.UserDefinedPlaySettings = (AudioUserDefinedPositioningBehavior)reader.ReadByte();
+                        reader.BaseStream.Position += 3;
+                        userDefinedShouldLoop = reader.ReadBoolean() ? AudioPositioningBehavior.UserDefinedShouldLoop : 0;
+                        audioProperties.TransitionTime = reader.ReadUInt32();
+                        ignoreListenerOrientation = reader.ReadBoolean() ? 0 : AudioPositioningBehavior.IgnoreListenerOrientation;
+                        audioProperties.ControlPointKeyCount = reader.ReadUInt32();
+                        audioProperties.ControlPointKeys = new AudioControlPointKey[audioProperties.ControlPointKeyCount];
+                        for (var i = 0; i < audioProperties.ControlPointKeyCount; i++)
+                        {
+                            AudioControlPointKey controlPointKey = default;
+                            controlPointKey.X = reader.ReadSingle();
+                            controlPointKey.Z = reader.ReadSingle();
+                            controlPointKey.Y = reader.ReadSingle();
+                            controlPointKey.Timestamp = reader.ReadUInt32();
+                            audioProperties.ControlPointKeys[i] = controlPointKey;
+                        }
+                        audioProperties.RandomRangeCount = reader.ReadUInt32();
+                        audioProperties.RandomRanges = new AudioPathRandomRange[audioProperties.RandomRangeCount];
+                        for (var i = 0; i < audioProperties.RandomRangeCount; i++)
+                        {
+                            AudioPathRandomRange randomRange = default;
+                            randomRange.LeftRight = reader.ReadSingle();
+                            randomRange.UpDown = reader.ReadSingle();
+                            audioProperties.RandomRanges[i] = randomRange;
+                        }
+                    }
+                }
+            }
+            audioProperties.Positioning |= 
+                overridePositioning
+                | twoDimensional
+                | enablePanner
+                | enableSpatialization
+                | updateAtEachFrame
+                | userDefinedShouldLoop
+                | ignoreListenerOrientation;
+
+            // Read Aux Sends settings: merge booleans into a single flag
+            AudioAuxSendsBehavior overrideGameDefined, useGameDefinedAuxSends, overrideUserDefined, overrideAuxSends;
+            overrideGameDefined = reader.ReadBoolean() ? AudioAuxSendsBehavior.OverrideGameDefined : 0;
+            useGameDefinedAuxSends = reader.ReadBoolean() ? AudioAuxSendsBehavior.UseGameDefinedAuxSends : 0;
+            overrideUserDefined = reader.ReadBoolean() ? AudioAuxSendsBehavior.OverrideUserDefined : 0;
+            overrideAuxSends = reader.ReadBoolean() ? AudioAuxSendsBehavior.OverrideAuxSends : 0;
+            audioProperties.AuxSendsBehavior |=
+                overrideGameDefined
+                | useGameDefinedAuxSends
+                | overrideUserDefined
+                | overrideAuxSends;
+
+            if (audioProperties.AuxSendsBehavior.HasFlag(AudioAuxSendsBehavior.OverrideAuxSends))
+            {
+                audioProperties.AuxiliarySendBusIds = new uint[4];
+                audioProperties.AuxiliarySendBusIds[0] = reader.ReadUInt32();
+                audioProperties.AuxiliarySendBusIds[1] = reader.ReadUInt32();
+                audioProperties.AuxiliarySendBusIds[2] = reader.ReadUInt32();
+                audioProperties.AuxiliarySendBusIds[3] = reader.ReadUInt32();
+            }
+
+            reader.BaseStream.Position += 3;
+            AudioLimitBehavior discardNewestInstance, useVirtual, limitGlobally, overrideParentPlaybackLimit, overrideParentVirtualVoice;
+            discardNewestInstance = reader.ReadBoolean() ? AudioLimitBehavior.DiscardNewest : 0;
+            useVirtual = reader.ReadBoolean() ? AudioLimitBehavior.UseVirtual : 0;
+            var soundInstanceLimit = reader.ReadUInt16();
+            limitGlobally = reader.ReadBoolean() ? AudioLimitBehavior.LimitGlobally : 0;
+            audioProperties.VirtualVoiceBehavior = (AudioVirtualVoiceBehavior)reader.ReadByte();
+            overrideParentPlaybackLimit = reader.ReadBoolean() ? AudioLimitBehavior.OverrideParentPlaybackLimit : 0;
+            overrideParentVirtualVoice = reader.ReadBoolean() ? AudioLimitBehavior.OverrideParentVirtualVoice : 0;
+            audioProperties.LimitBehavior |=
+                discardNewestInstance
+                | useVirtual
+                | limitGlobally
+                | overrideParentPlaybackLimit
+                | overrideParentVirtualVoice;
+
+            AudioHdrSettings overrideEnvelopeTracking, overrideLoudnessNormalization, enableLoudnessNormalization, enableEnvelope;
+            overrideEnvelopeTracking = reader.ReadBoolean() ? AudioHdrSettings.OverrideEnvelopeTracking : 0;
+            overrideLoudnessNormalization = reader.ReadBoolean() ? AudioHdrSettings.EnableLoudnessNormalization : 0;
+            enableLoudnessNormalization = reader.ReadBoolean() ? AudioHdrSettings.EnableLoudnessNormalization : 0;
+            enableEnvelope = reader.ReadBoolean() ? AudioHdrSettings.EnableEnvelope : 0;
+            audioProperties.HdrSettings |=
+                overrideEnvelopeTracking
+                | overrideLoudnessNormalization
+                | enableLoudnessNormalization
+                | enableEnvelope;
+
+            audioProperties.StateGroupCount = reader.ReadUInt32();
+            audioProperties.StateGroups = new AudioStateGroup[audioProperties.StateGroupCount];
+            for (var i = 0; i < audioProperties.StateGroupCount; i++)
+            {
+                var stateGroup = new AudioStateGroup();
+                stateGroup.Id = reader.ReadUInt32();
+                stateGroup.MusicChangeAt = (MusicKeyPointByte)reader.ReadByte();
+                stateGroup.StateWithSettingsCount = reader.ReadUInt16();
+                stateGroup.StatesWithSettings = new AudioStateWithSettings[stateGroup.StateWithSettingsCount];
+                for (var j = 0; j < stateGroup.StateWithSettingsCount; j++)
+                {
+                    AudioStateWithSettings AudioStateWithSettings = default;
+                    AudioStateWithSettings.StateId = reader.ReadUInt32();
+                    AudioStateWithSettings.SettingsId = reader.ReadUInt32();
+                    stateGroup.StatesWithSettings[j] = AudioStateWithSettings;
+                }
+                audioProperties.StateGroups[i] = stateGroup;
+            }
+            audioProperties.RtpcCount = reader.ReadUInt16();
+            audioProperties.Rtpcs = new AudioRtpc[audioProperties.RtpcCount];
+            for (var i = 0; i < audioProperties.RtpcCount; i++)
+            {
+                var rtpc = new AudioRtpc();
+                rtpc.X = reader.ReadUInt32();
+                rtpc.Parameter = (RtpcParameterType)reader.ReadUInt32();
+                rtpc.UnknownId = reader.ReadUInt32();
+                rtpc.CurveScalingType = (RtpcCurveType)reader.ReadByte();
+                rtpc.PointCount = reader.ReadUInt16();
+                rtpc.Points = new RtpcPoint[rtpc.PointCount];
+                for (var j = 0; j < rtpc.PointCount; j++)
+                {
+                    RtpcPoint rtpcPoint = new RtpcPoint();
+                    rtpcPoint.X = reader.ReadSingle();
+                    rtpcPoint.Y = reader.ReadSingle();
+                    rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte)reader.ReadByte();
+                    rtpc.Points[j] = rtpcPoint;
+                }
+                audioProperties.Rtpcs[i] = rtpc;
+            }
+            return audioProperties;
+        }
+
         private static AudioProperties ReadAudioProperties(this BinaryReader reader)
         {
             var audioProperties = new AudioProperties();
