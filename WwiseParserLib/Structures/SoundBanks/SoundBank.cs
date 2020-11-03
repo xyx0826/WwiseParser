@@ -32,8 +32,10 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// Parses the specified chunk.
         /// </summary>
         /// <param name="name">The name of the chunk to parse.</param>
+        /// <param name="noParse">Whether to not parse HIRC objects. If true,
+        /// all objects will be <see cref="Unknown"/>.</param>
         /// <returns>The parsed chunk, or null if the specified chunk is unsupported or does not exist.</returns>
-        public SoundBankChunk ParseChunk(SoundBankChunkType name)
+        public SoundBankChunk ParseChunk(SoundBankChunkType name, bool noParse = false)
         {
             var blob = ReadChunkBlob(name);
             if (blob == null)
@@ -47,7 +49,7 @@ namespace WwiseParserLib.Structures.SoundBanks
                     return BKHDParser.Parse(blob);
 
                 case SoundBankChunkType.HIRC:
-                    return HIRCParser.Parse(blob);
+                    return HIRCParser.Parse(blob, noParse);
 
                 case SoundBankChunkType.STMG:
                     return STMGParser.Parse(blob);
@@ -61,11 +63,13 @@ namespace WwiseParserLib.Structures.SoundBanks
         /// Gets the parsed specified chunk from the current SoundBank.
         /// </summary>
         /// <param name="name">The name of the chunk.</param>
+        /// <param name="noParse">Whether to not parse HIRC objects. If true,
+        /// all objects will be <see cref="Unknown"/>.</param>
         /// <returns>The parsed specified chunk, or null if one does not exist.</returns>
         /// <exception cref="NotImplementedException">
         /// Thrown when an unsupported chunk name is specified.
         /// See <see cref="ParseChunk(SoundBankChunkType)"/>.</exception>
-        public SoundBankChunk GetChunk(SoundBankChunkType name)
+        public SoundBankChunk GetChunk(SoundBankChunkType name, bool noParse = false)
         {
             // Is it already parsed?
             // The index of the chunk in all chunks
@@ -75,7 +79,7 @@ namespace WwiseParserLib.Structures.SoundBanks
             if (chunk == null)
             {
                 // Chunk not already parsed, try parsing it now
-                if ((chunk = ParseChunk(name)) == null)
+                if ((chunk = ParseChunk(name, noParse)) == null)
                 {
                     // Chunk does not exist
                     return null;

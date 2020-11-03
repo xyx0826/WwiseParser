@@ -17,8 +17,9 @@ namespace WwiseParserLib.Parsers
         /// Parses a HIRC chunk.
         /// </summary>
         /// <param name="blob">Chunk data to parse, without the leading type magic.</param>
+        /// <param name="noParse">Whether to only extract blobs and not parse fields.</param>
         /// <returns>The parsed chunk.</returns>
-        public static SoundBankHierarchyChunk Parse(byte[] blob)
+        public static SoundBankHierarchyChunk Parse(byte[] blob, bool noParse = false)
         {
             using (var reader = new BinaryReader(new MemoryStream(blob)))
             {
@@ -33,72 +34,81 @@ namespace WwiseParserLib.Parsers
                     var objectBlob = reader.ReadBytes((int)objectLength);
 
                     HIRCObjectBase hircObject;
-                    switch ((HIRCObjectType)objectType)
+
+                    if (noParse)
                     {
-                        case HIRCObjectType.Settings:
-                            hircObject = ParseSettings(objectBlob);
-                            break;
-
-                        case HIRCObjectType.Sound:
-                            hircObject = ParseSound(objectBlob);
-                            break;
-
-                        case HIRCObjectType.EventAction:
-                            hircObject = ParseEventAction(objectBlob);
-                            break;
-
-                        case HIRCObjectType.Event:
-                            hircObject = ParseEvent(objectBlob);
-                            break;
-
-                        case HIRCObjectType.Container:
-                            hircObject = ParseContainer(objectBlob);
-                            break;
-
-                        case HIRCObjectType.SwitchContainer:
-                            hircObject = ParseSwitchContainer(objectBlob);
-                            break;
-
-                        case HIRCObjectType.ActorMixer:
-                            hircObject = ParseActorMixer(objectBlob);
-                            break;
-
-                        case HIRCObjectType.AudioBus:
-                            hircObject = ParseAudioBus(objectBlob, false);
-                            break;
-
-                        case HIRCObjectType.BlendContainer:
-                            hircObject = ParseBlendContainer(objectBlob);
-                            break;
-
-                        case HIRCObjectType.MusicSegment:
-                            hircObject = ParseMusicSegment(objectBlob);
-                            break;
-
-                        case HIRCObjectType.MusicTrack:
-                            hircObject = ParseMusicTrack(objectBlob);
-                            break;
-
-                        case HIRCObjectType.MusicSwitchContainer:
-                            hircObject = ParseMusicSwitchContainer(objectBlob);
-                            break;
-
-                        case HIRCObjectType.MusicPlaylistContainer:
-                            hircObject = ParseMusicPlaylistContainer(objectBlob);
-                            break;
-
-                        case HIRCObjectType.DialogueEvent:
-                            hircObject = ParseDialogueEvent(objectBlob);
-                            break;
-
-                        case HIRCObjectType.AuxiliaryBus:
-                            hircObject = ParseAudioBus(objectBlob, true) as AuxiliaryBus;
-                            break;
-
-                        default:
-                            hircObject = ParseUnknown(objectType, objectBlob);
-                            break;
+                        hircObject = ParseUnknown(objectType, objectBlob);
                     }
+                    else
+                    {
+                        switch ((HIRCObjectType)objectType)
+                        {
+                            case HIRCObjectType.Settings:
+                                hircObject = ParseSettings(objectBlob);
+                                break;
+
+                            case HIRCObjectType.Sound:
+                                hircObject = ParseSound(objectBlob);
+                                break;
+
+                            case HIRCObjectType.EventAction:
+                                hircObject = ParseEventAction(objectBlob);
+                                break;
+
+                            case HIRCObjectType.Event:
+                                hircObject = ParseEvent(objectBlob);
+                                break;
+
+                            case HIRCObjectType.Container:
+                                hircObject = ParseContainer(objectBlob);
+                                break;
+
+                            case HIRCObjectType.SwitchContainer:
+                                hircObject = ParseSwitchContainer(objectBlob);
+                                break;
+
+                            case HIRCObjectType.ActorMixer:
+                                hircObject = ParseActorMixer(objectBlob);
+                                break;
+
+                            case HIRCObjectType.AudioBus:
+                                hircObject = ParseAudioBus(objectBlob, false);
+                                break;
+
+                            case HIRCObjectType.BlendContainer:
+                                hircObject = ParseBlendContainer(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicSegment:
+                                hircObject = ParseMusicSegment(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicTrack:
+                                hircObject = ParseMusicTrack(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicSwitchContainer:
+                                hircObject = ParseMusicSwitchContainer(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicPlaylistContainer:
+                                hircObject = ParseMusicPlaylistContainer(objectBlob);
+                                break;
+
+                            case HIRCObjectType.DialogueEvent:
+                                hircObject = ParseDialogueEvent(objectBlob);
+                                break;
+
+                            case HIRCObjectType.AuxiliaryBus:
+                                hircObject = ParseAudioBus(objectBlob, true) as AuxiliaryBus;
+                                break;
+
+                            default:
+                                hircObject = ParseUnknown(objectType, objectBlob);
+                                break;
+                        }
+                    }
+
                     hircSection.Objects[i] = hircObject;
                 }
 

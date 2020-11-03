@@ -26,6 +26,8 @@ namespace WwiseParser
 
         private bool _isInspector;
 
+        private bool _isInspectorBlobs;
+
         private static JsonSerializerSettings _jsonSettings;
 
         private SoundBankParser()
@@ -52,7 +54,8 @@ namespace WwiseParser
         /// <param name="skipSTMG">Whether to skip STMG chunk.</param>
         /// <param name="skipHIRC">Whether to skip HIRC chunk.</param>
         /// <param name="isInspector">Whether to parse in inspector mode.</param>
-        public SoundBankParser(string filePath, bool skipSTMG, bool skipHIRC, bool isInspector) : this()
+        /// <param name="isInspectorBlobs">Whether to parse in inspector mode blobs only.</param>
+        public SoundBankParser(string filePath, bool skipSTMG, bool skipHIRC, bool isInspector, bool isInspectorBlobs) : this()
         {
             ValidateSoundBank(filePath);
             EnsureOutputPath(filePath);
@@ -60,6 +63,7 @@ namespace WwiseParser
             _parseStmg = !skipSTMG;
             _parseHirc = !skipHIRC;
             _isInspector = isInspector;
+            _isInspectorBlobs = isInspectorBlobs;
         }
 
         /// <summary>
@@ -70,8 +74,8 @@ namespace WwiseParser
             SoundBankChunk chunk;
             if (_parseHirc)
             {
-                chunk = SoundBank.GetChunk(SoundBankChunkType.HIRC);
-                if (_isInspector)
+                chunk = SoundBank.GetChunk(SoundBankChunkType.HIRC, _isInspectorBlobs);
+                if (_isInspector || _isInspectorBlobs)
                 {
                     ParseHIRCInspector(chunk as SoundBankHierarchyChunk);
                 }
