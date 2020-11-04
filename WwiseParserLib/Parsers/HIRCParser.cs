@@ -535,6 +535,97 @@ namespace WwiseParserLib.Parsers
                 return musicSegment;
             }
         }
+        
+        public static MusicSwitchContainer ParseMusicSwitchContainer2013(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var musicSwitchContainer = new MusicSwitchContainer(data.Length);
+                musicSwitchContainer.Id = reader.ReadUInt32();
+                musicSwitchContainer.Properties = reader.ReadAudioProperties2013();
+                musicSwitchContainer.ChildCount = reader.ReadUInt32();
+                musicSwitchContainer.ChildIds = new uint[musicSwitchContainer.ChildCount];
+                for (var i = 0; i < musicSwitchContainer.ChildCount; i++)
+                {
+                    musicSwitchContainer.ChildIds[i] = reader.ReadUInt32();
+                }
+                musicSwitchContainer.GridPeriodTime = reader.ReadDouble();
+                musicSwitchContainer.GridOffsetTime = reader.ReadDouble();
+                musicSwitchContainer.Tempo = reader.ReadSingle();
+                musicSwitchContainer.TimeSignatureUpper = reader.ReadByte();
+                musicSwitchContainer.TimeSignatureLower = reader.ReadByte();
+                musicSwitchContainer.Unknown_1 = reader.ReadByte();
+                musicSwitchContainer.StingerCount = reader.ReadUInt32();
+                musicSwitchContainer.Stingers = new MusicStinger[musicSwitchContainer.StingerCount];
+                for (var i = 0; i < musicSwitchContainer.StingerCount; i++)
+                {
+                    MusicStinger stinger = default;
+                    stinger.TriggerId = reader.ReadUInt32();
+                    stinger.SegmentId = reader.ReadUInt32();
+                    stinger.PlayAt = (MusicKeyPointUInt)reader.ReadUInt32();
+                    stinger.CueId = reader.ReadUInt32();
+                    stinger.DoNotRepeatIn = reader.ReadUInt32();
+                    stinger.AllowPlayingInNextSegment = reader.ReadUInt32() == 1;
+                    musicSwitchContainer.Stingers[i] = stinger;
+                }
+                musicSwitchContainer.TransitionCount = reader.ReadUInt32();
+                musicSwitchContainer.Transitions = new MusicTransition[musicSwitchContainer.TransitionCount];
+                for (var i = 0; i < musicSwitchContainer.TransitionCount; i++)
+                {
+                    MusicTransition transition = default;
+                    transition.Unknown_1 = reader.ReadUInt32();
+                    transition.SourceId = reader.ReadUInt32();
+                    transition.Unknown_2 = reader.ReadUInt32();
+                    transition.DestinationId = reader.ReadUInt32();
+                    transition.FadeOutDuration = reader.ReadUInt32();
+                    transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                    transition.FadeOutOffset = reader.ReadInt32();
+                    transition.ExitSourceAt = (MusicKeyPointByte)reader.ReadUInt32();
+                    transition.ExitSourceAtCueId = reader.ReadUInt32();
+                    transition.PlayPostExit = reader.ReadByte() == 0xFF;
+                    transition.FadeInDuration = reader.ReadUInt32();
+                    transition.FadeInCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                    transition.FadeInOffset = reader.ReadInt32();
+                    transition.CustomCueFilterId = reader.ReadUInt32();
+                    transition.JumpToPlaylistItemId = reader.ReadUInt32();
+                    transition.DestinationSyncTo = (MusicTransitionSyncTarget)reader.ReadUInt16();
+                    transition.PlayPreEntry = reader.ReadByte() == 0xFF;
+                    transition.MatchSourceCueName = reader.ReadBoolean();
+                    transition.UseTransitionSegment = reader.ReadBoolean();
+                    if (transition.UseTransitionSegment)
+                    {
+                        transition.TransitionSegmentId = reader.ReadUInt32();
+                        transition.TransitionFadeInDuration = reader.ReadUInt32();
+                        transition.TransitionFadeInCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                        transition.TransitionFadeInOffset = reader.ReadInt32();
+                        transition.TransitionFadeOutDuration = reader.ReadUInt32();
+                        transition.TransitionFadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                        transition.TransitionFadeOutOffset = reader.ReadInt32();
+                        transition.PlayTransitionPreEntry = reader.ReadByte() == 0xFF;
+                        transition.PlayTransitionPostExit = reader.ReadByte() == 0xFF;
+                    }
+                    musicSwitchContainer.Transitions[i] = transition;
+                }
+                musicSwitchContainer.ContinueOnSwitchChange = reader.ReadBoolean();
+                musicSwitchContainer.GroupCount = reader.ReadUInt32();
+                musicSwitchContainer.GroupIds = new uint[musicSwitchContainer.GroupCount];
+                for (var i = 0; i < musicSwitchContainer.GroupCount; i++)
+                {
+                    musicSwitchContainer.GroupIds[i] = reader.ReadUInt32();
+                }
+                musicSwitchContainer.GroupTypes = new bool[musicSwitchContainer.GroupCount];
+                for (var i = 0; i < musicSwitchContainer.GroupCount; i++)
+                {
+                    musicSwitchContainer.GroupTypes[i] = reader.ReadBoolean();
+                }
+                musicSwitchContainer.PathSectionLength = reader.ReadUInt32();
+                musicSwitchContainer.UseWeighted = reader.ReadBoolean();
+                musicSwitchContainer.Paths = reader.ReadPaths(musicSwitchContainer.PathSectionLength, musicSwitchContainer.ChildIds);
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                return musicSwitchContainer;
+            }
+        }
 
         public static MusicSwitchContainer ParseMusicSwitchContainer(byte[] data)
         {
