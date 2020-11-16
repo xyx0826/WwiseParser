@@ -49,10 +49,23 @@ namespace WwiseParserLib.Structures.SoundBanks
                     return BKHDParser.Parse(blob);
 
                 case SoundBankChunkType.HIRC:
-                    return HIRCParser.Parse(blob, noParse);
+                    // Wwise 2016 or 2013?
+                    var bkhd = GetChunk(SoundBankChunkType.BKHD) as SoundBankHeaderChunk;
+                    if (bkhd == null)
+                    {
+                        throw new InvalidOperationException("Unable to parse the HIRC chunk;" +
+                            "could not find the BKHD chunk to determine SoundBank version.");
+                    }
+                    // TODO: refactor magic - Wwise 2016 SoundBank version
+                    return bkhd.SoundBankVersion >= 0x71
+                        ? HIRCParser.Parse(blob, noParse)
+                        : HIRCParser.Parse2013(blob, noParse);
 
                 case SoundBankChunkType.STMG:
                     return STMGParser.Parse(blob);
+
+                case SoundBankChunkType.STID:
+                    return STIDParser.Parse(blob);
 
                 default:
                     return null;

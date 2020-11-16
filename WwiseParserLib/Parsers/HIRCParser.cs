@@ -116,6 +116,67 @@ namespace WwiseParserLib.Parsers
             }
         }
 
+        /// <summary>
+        /// Parses a HIRC chunk from a Wwise 2013 SoundBank.
+        /// Support for Wwise 2013 is incomplete - currently only the Interactive Music Hierarchy is implemented.
+        /// </summary>
+        /// <param name="blob">Chunk data to parse, without the leading type magic.</param>
+        /// <param name="noParse">Whether to only extract blobs and not parse fields.</param>
+        /// <returns>The parsed chunk.</returns>
+        public static SoundBankHierarchyChunk Parse2013(byte[] blob, bool noParse = false)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(blob)))
+            {
+                var hircSection = new SoundBankHierarchyChunk(blob.Length);
+                hircSection.ObjectCount = reader.ReadUInt32();
+                hircSection.Objects = new HIRCObjectBase[hircSection.ObjectCount];
+                var objects = new Dictionary<byte, int>();
+                for (var i = 0; i < hircSection.ObjectCount; i++)
+                {
+                    var objectType = reader.ReadByte();
+                    var objectLength = reader.ReadUInt32();
+                    var objectBlob = reader.ReadBytes((int)objectLength);
+
+                    HIRCObjectBase hircObject;
+
+                    if (noParse)
+                    {
+                        hircObject = ParseUnknown(objectType, objectBlob);
+                    }
+                    else
+                    {
+                        switch ((HIRCObjectType)objectType)
+                        {
+                            case HIRCObjectType.MusicSegment:
+                                hircObject = ParseMusicSegment2013(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicTrack:
+                                hircObject = ParseMusicTrack2013(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicSwitchContainer:
+                                hircObject = ParseMusicSwitchContainer2013(objectBlob);
+                                break;
+
+                            case HIRCObjectType.MusicPlaylistContainer:
+                                hircObject = ParseMusicPlaylistContainer2013(objectBlob);
+                                break;
+
+                            default:
+                                hircObject = ParseUnknown(objectType, objectBlob);
+                                break;
+                        }
+                    }
+
+                    hircSection.Objects[i] = hircObject;
+                }
+
+                return hircSection;
+            }
+        }
+
+
         public static AudioBus ParseAudioBus(byte[] data, bool auxiliary)
         {
             using (var reader = new BinaryReader(new MemoryStream(data)))
@@ -734,7 +795,7 @@ namespace WwiseParserLib.Parsers
                     sound.Unknown_05 = reader.ReadByte();
                     sound.Conversion = (SoundConversionType)reader.ReadByte();
                     sound.Unknown_07 = reader.ReadByte();
-                    var soundSource = reader.ReadByte();
+                    var soundSource = reader.ReadUInt32();
                     if (soundSource == 0)
                     {
                         sound.Source = SoundSource.Embedded;
@@ -753,12 +814,14 @@ namespace WwiseParserLib.Parsers
                     }
                     sound.AudioId = reader.ReadUInt32();
                     reader.BaseStream.Position += 4;    // embedded SoundBank ID or WEM ID
-                    if (sound.Source.HasFlag(SoundSource.Embedded))
+                    if (sound.Source == SoundSource.Embedded)
                     {
                         reader.BaseStream.Position += 4;    // byteOffset
                         sound.AudioLength = reader.ReadUInt32();
                     }
                     // else zeroLatency: uint unk, uint prefetchLengthBits
+                    // else: four bytes (length)? and one byte unk
+                    sound.AudioLength = reader.ReadUInt32();
                     sound.AudioType = (SoundType)reader.ReadByte();
                     musicTrack.Sounds[i] = sound;
                 }
@@ -799,8 +862,8 @@ namespace WwiseParserLib.Parsers
                     }
                     musicTrack.Curves[i] = curve;
                 }
-                musicTrack.Properties = reader.ReadAudioProperties();
-                musicTrack.TrackType = (MusicTrackType)reader.ReadByte();
+                musicTrack.Properties = reader.ReadAudioProperties2013();
+                musicTrack.TrackType = (MusicTrackType)reader.ReadUInt32();
                 if (musicTrack.TrackType == MusicTrackType.Switch)
                 {
                     // shouldn't happen
@@ -866,7 +929,7 @@ namespace WwiseParserLib.Parsers
                     timeParameter.EndOffset = reader.ReadDouble();
                     musicTrack.TimeParameters[i] = timeParameter;
                 }
-                musicTrack.SubTrackCount = reader.ReadUInt32();
+                musicTrack.SubTrackCount = reader.ReadUInt32(); // 2019: byte??
                 if (musicTrack.SoundCount > 0)
                 {
                     // FIXME: workaround - when MusicTrack have zero sounds, one of the uints is too much before AudioProperties
@@ -1407,7 +1470,7 @@ namespace WwiseParserLib.Parsers
                     RtpcPoint rtpcPoint = new RtpcPoint();
                     rtpcPoint.X = reader.ReadSingle();
                     rtpcPoint.Y = reader.ReadSingle();
-                    rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte)reader.ReadByte();
+                    rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte)reader.ReadUInt32();
                     rtpc.Points[j] = rtpcPoint;
                 }
                 audioProperties.Rtpcs[i] = rtpc;

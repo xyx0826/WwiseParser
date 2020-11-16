@@ -18,7 +18,7 @@ namespace WwiseParserLib.Parsers
             using (var reader = new BinaryReader(new MemoryStream(blob)))
             {
                 var bkhdSection = new SoundBankHeaderChunk(blob.Length);
-                bkhdSection.SoundBankVersion = reader.ReadUInt32();
+                bkhdSection.SoundBankVersion = reader.ReadUInt32(); // 0x86 wwise 2019
                 bkhdSection.SoundBankId = reader.ReadUInt32();
 
                 return bkhdSection;

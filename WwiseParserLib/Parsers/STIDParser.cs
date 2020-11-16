@@ -21,7 +21,9 @@ namespace WwiseParserLib.Parsers
                 {
                     var soundBankMapping = new SoundBankMapping();
                     soundBankMapping.NameLength = reader.ReadByte();
+                    soundBankMapping.Id = reader.ReadUInt32();
                     soundBankMapping.Name = Encoding.UTF8.GetString(reader.ReadBytes(soundBankMapping.NameLength));
+                    soundBankMappings[i] = soundBankMapping;
                 }
                 stidSection.SoundBankMappings = soundBankMappings;
                 return stidSection;

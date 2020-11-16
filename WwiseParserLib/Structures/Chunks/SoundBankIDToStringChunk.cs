@@ -41,6 +41,11 @@
         public byte NameLength { get; set; }
 
         /// <summary>
+        /// The ID of the SoundBank.
+        /// </summary>
+        public uint Id { get; set; }
+
+        /// <summary>
         /// The name of the SoundBank.
         /// </summary>
         public string Name { get; set; }
