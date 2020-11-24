@@ -178,15 +178,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         /// </summary>
         public AudioVirtualVoiceReturnBehavior VirtualVoiceReturnBehavior { get; set; }
 
-        /// <summary>
-        /// Unknown byte. Appears to always be zero.
-        /// </summary>
-        public byte Unknown_3 { get; set; }
-
-        /// <summary>
-        /// Unknown byte. Appears to be always zero.
-        /// </summary>
-        public byte Unknown_4 { get; set; }
+        public ushort LimitSoundInstancesTo { get; set; }
 
         /// <summary>
         /// <para>The behavior when the audio object is being converted to a virtual voice.</para>

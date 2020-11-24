@@ -57,9 +57,21 @@ namespace WwiseParserLib.Structures.SoundBanks
                             "could not find the BKHD chunk to determine SoundBank version.");
                     }
                     // TODO: refactor magic - Wwise 2016 SoundBank version
-                    return bkhd.SoundBankVersion >= 0x71
-                        ? HIRCParser.Parse(blob, noParse)
-                        : HIRCParser.Parse2013(blob, noParse);
+                    if (bkhd.SoundBankVersion == 0x71)
+                    {
+                        // Wwise 2016
+                        return HIRCParser.Parse(blob, noParse);
+                    }
+                    else if (bkhd.SoundBankVersion < 0x71)
+                    {
+                        // Wwise 2013
+                        return HIRCParser.Parse2013(blob, noParse);
+                    }
+                    else
+                    {
+                        // Wwise 2019
+                        return HIRCParser.Parse2019(blob, noParse);
+                    }
 
                 case SoundBankChunkType.STMG:
                     return STMGParser.Parse(blob);

@@ -12,9 +12,10 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         }
 
         /// <summary>
-        /// An unknown value. Seems to always be zero.
+        /// The MIDI behavior of the Music Track.
+        /// Only available in Wwise 2019.
         /// </summary>
-        public byte Unknown { get; set; }
+        public MusicMidiBehavior MidiBehavior { get; set; }
 
         /// <summary>
         /// The count of sound objects included in the Music Track.
