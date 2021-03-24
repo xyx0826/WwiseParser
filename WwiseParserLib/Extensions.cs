@@ -50,9 +50,16 @@
         /// <returns>The converted timecode.</returns>
         public static string ToTimeCode(this double ms)
         {
+            bool minus = false;
+            if (ms < 0)
+            {
+                ms = -ms;
+                minus = true;
+            }
             var secs = (int)ms / 1000;
             var millis = (int)ms % 1000;
-            return $"{(secs / 60).ToString("00")}:{(secs % 60).ToString("00")}.{millis.ToString("000")}";
+            var str = $"{secs / 60:00}:{secs % 60:00}.{millis:000}";
+            return minus ? '-' + str : str;
         }
     }
 }

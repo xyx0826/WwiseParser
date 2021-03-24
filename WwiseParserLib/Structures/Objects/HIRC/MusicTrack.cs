@@ -150,11 +150,15 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public override string ToString()
         {
+            //return $"Starts at {BeginOffset.ToTimeCode()}\n" +
+            //       $"from {BeginTrimOffset.ToTimeCode()}\n" +
+            //       $"Ends at {EndOffset.ToTimeCode()}\n" +
+            //       $"to {EndTrimOffset.ToTimeCode()}";
             var beginAt = BeginOffset + BeginTrimOffset;
             var duration = EndOffset + EndTrimOffset - BeginTrimOffset;
             var endAt = beginAt + duration;
-            return $"{beginAt.ToTimeCode()} => {endAt.ToTimeCode()}\n" +
-                $"{BeginTrimOffset.ToTimeCode()} => {(EndOffset - EndTrimOffset).ToTimeCode()}";
+            return $"Play from {beginAt.ToTimeCode()} => {endAt.ToTimeCode()}\n" +
+                $"Played {BeginTrimOffset.ToTimeCode()} => {(EndOffset - EndTrimOffset).ToTimeCode()}";
         }
     }
 

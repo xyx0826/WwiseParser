@@ -1219,11 +1219,11 @@ namespace WwiseParserLib.Parsers
                     MusicTrackTimeParameter timeParameter = default;
                     timeParameter.SubTrackIndex = reader.ReadUInt32();
                     timeParameter.AudioId = reader.ReadUInt32();
+                    reader.BaseStream.Position += 4;    // Unknown uint or float
                     timeParameter.BeginOffset = reader.ReadDouble();
                     timeParameter.BeginTrimOffset = reader.ReadDouble();
                     timeParameter.EndTrimOffset = reader.ReadDouble();
                     timeParameter.EndOffset = reader.ReadDouble();
-                    reader.BaseStream.Position += 4;    // Unknown uint or float
                     musicTrack.TimeParameters[i] = timeParameter;
                 }
                 musicTrack.SubTrackCount = reader.ReadUInt32();
