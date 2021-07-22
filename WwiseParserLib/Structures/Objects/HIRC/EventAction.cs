@@ -1,4 +1,5 @@
-﻿using WwiseParserLib.Structures.Objects.HIRC.Structs;
+﻿using System;
+using WwiseParserLib.Structures.Objects.HIRC.Structs;
 
 namespace WwiseParserLib.Structures.Objects.HIRC
 {
@@ -23,9 +24,12 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public float[] ParameterValues { get; set; }
 
-        public byte Unknown_08 { get; set; }   // 0
-
         public EventActionSettings Settings { get; set; }
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class HasSettingsAttribute : Attribute
+    {
     }
 
     public enum EventActionScope : byte
@@ -41,10 +45,10 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
     public enum EventActionType : byte
     {
-        Stop = 0x01,
-        Pause,
-        Resume,
-        Play,
+        [HasSettings] Stop = 0x01,
+        [HasSettings] Pause,
+        [HasSettings] Resume,
+        [HasSettings] Play,
         Trigger,
         Mute,
         UnMute,
@@ -61,16 +65,36 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         SetState,
         SetGameParameter,
         ResetGameParameter,
-        SetSwitch,
+        SetSwitch = 0x19,
         ToggleBypass,
         ResetBypassEffect,
         Break,
-        Seek
+        [HasSettings] Seek = 0x1e
     }
 
     public abstract class EventActionSettings
     {
 
+    }
+
+    public class EventActionException
+    {
+        /// <summary>
+        /// The ID of the exception object.
+        /// </summary>
+        public uint Id { get; set; }
+
+        /// <summary>
+        /// Unknown byte. Always zero.
+        /// </summary>
+        public byte Unknown { get; set; }
+    }
+
+    public abstract class EventActionSettingsWithExceptions : EventActionSettings
+    {
+        public byte ExceptionCount { get; set; }
+
+        public EventActionException[] Exceptions { get; set; }
     }
 
     public class EventActionUnknownSettings : EventActionSettings
@@ -82,6 +106,50 @@ namespace WwiseParserLib.Structures.Objects.HIRC
     {
         public AudioCurveShapeByte FadeInCurve { get; set; }
 
-        public uint ObjectSoundBankId { get; set; }
+        public uint TargetSoundBankId { get; set; }
+    }
+
+    public class EventActionStopSettings : EventActionSettingsWithExceptions
+    {
+        public AudioCurveShapeByte FadeOutCurve { get; set; }
+
+        /// <summary>
+        /// The LSB represents IncludeDelayedResumeActions.
+        /// </summary>
+        public byte Flag { get; set; }
+    }
+
+    public class EventActionPauseSettings : EventActionSettingsWithExceptions
+    {
+        public AudioCurveShapeByte FadeOutCurve { get; set; }
+    }
+
+    public class EventActionResumeSettings : EventActionSettingsWithExceptions
+    {
+        public AudioCurveShapeByte FadeInCurve { get; set; }
+
+        /// <summary>
+        /// The LSB represents MasterResume.
+        /// </summary>
+        public byte Flag { get; set; }
+    }
+
+    public enum EventActionSeekType : byte
+    {
+        Time,
+        Percent
+    }
+
+    public class EventActionSeekSettings : EventActionSettingsWithExceptions
+    {
+        public EventActionSeekType SeekType { get; set; }
+
+        public float Seek { get; set; }
+
+        public uint Unknown_0 { get; set; }
+
+        public uint Unknown_1 { get; set; }
+
+        public bool SeekToNearestMarker { get; set; }
     }
 }
