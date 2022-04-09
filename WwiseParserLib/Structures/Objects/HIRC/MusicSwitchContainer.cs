@@ -101,26 +101,26 @@ namespace WwiseParserLib.Structures.Objects.HIRC
     public struct MusicTransition
     {
         /// <summary>
-        /// Unknown value. Appears to always be 1.
+        /// Number of transition source IDs.
         /// </summary>
-        public uint Unknown_1 { get; set; }
+        public uint SourceIdCount { get; set; }
 
         /// <summary>
         /// <para>The ID of the transition source object.</para>
         /// <para>Location: Music Switch Container Property Editor > Transitions > Source</para>
         /// </summary>
-        public uint SourceId { get; set; }
+        public uint[] SourceIds { get; set; }
 
         /// <summary>
-        /// Unknown value. Appears to always be 1.
+        /// Number of transition destination IDs.
         /// </summary>
-        public uint Unknown_2 { get; set; }
+        public uint DestinationIdCount { get; set; }
 
         /// <summary>
         /// <para>The ID of the transition destination object.</para>
         /// <para>Location: Music Switch Container Property Editor > Transitions > Destination</para>
         /// </summary>
-        public uint DestinationId { get; set; }
+        public uint[] DestinationIds { get; set; }
 
         /// <summary>
         /// <para>The duration of source fade-out, in milliseconds.</para>

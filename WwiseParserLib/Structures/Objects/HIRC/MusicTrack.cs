@@ -129,6 +129,11 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         public uint AudioId { get; set; }
 
         /// <summary>
+        /// <para>The corresponding event ID.</para>
+        /// </summary>
+        public uint EventId { get; set; }
+
+        /// <summary>
         /// <para>The start offset of this Music Track, relative to the timeline of its parent.</para>
         /// </summary>
         public double BeginOffset { get; set; }

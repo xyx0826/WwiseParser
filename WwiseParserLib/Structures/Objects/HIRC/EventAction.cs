@@ -16,13 +16,19 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public uint ObjectId { get; set; }
 
-        public byte Unknown_06 { get; set; }   // 0
+        public byte Unknown_06 { get; set; }   // 0, 1 appears in D2BL
 
         public byte ParameterCount { get; set; }
 
         public AudioParameterType[] ParameterTypes { get; set; }
 
-        public float[] ParameterValues { get; set; }
+        public int[] ParameterValues { get; set; }
+
+        public byte ParameterPairCount { get; set; }
+
+        public byte[] ParameterPairTypes { get; set; }
+
+        public AudioParameterPair[] ParameterPairValues { get; set; }
 
         public EventActionSettings Settings { get; set; }
     }

@@ -205,28 +205,16 @@ namespace WwiseParserLib.Parsers
                     }
                     else
                     {
-                        switch ((HIRCObjectType)objectType)
+                        hircObject = (HIRCObjectType) objectType switch
                         {
-                            case HIRCObjectType.MusicSegment:
-                                hircObject = ParseMusicSegment2019(objectBlob);
-                                break;
-
-                            case HIRCObjectType.MusicTrack:
-                                hircObject = ParseMusicTrack2019(objectBlob);
-                                break;
-
-                            case HIRCObjectType.MusicSwitchContainer:
-                                hircObject = ParseMusicSwitchContainer2019(objectBlob);
-                                break;
-
-                            case HIRCObjectType.MusicPlaylistContainer:
-                                hircObject = ParseMusicPlaylistContainer2019(objectBlob);
-                                break;
-
-                            default:
-                                hircObject = ParseUnknown(objectType, objectBlob);
-                                break;
-                        }
+                            HIRCObjectType.Event => ParseEvent2019(objectBlob),
+                            HIRCObjectType.EventAction => ParseEventAction(objectBlob),
+                            HIRCObjectType.MusicSegment => ParseMusicSegment2019(objectBlob),
+                            HIRCObjectType.MusicTrack => ParseMusicTrack2019(objectBlob),
+                            HIRCObjectType.MusicSwitchContainer => ParseMusicSwitchContainer2019(objectBlob),
+                            HIRCObjectType.MusicPlaylistContainer => ParseMusicPlaylistContainer2019(objectBlob),
+                            _ => ParseUnknown(objectType, objectBlob)
+                        };
                     }
 
                     hircSection.Objects[i] = hircObject;
@@ -748,10 +736,18 @@ namespace WwiseParserLib.Parsers
                 for (var i = 0; i < musicSwitchContainer.TransitionCount; i++)
                 {
                     MusicTransition transition = default;
-                    transition.Unknown_1 = reader.ReadUInt32();
-                    transition.SourceId = reader.ReadUInt32();
-                    transition.Unknown_2 = reader.ReadUInt32();
-                    transition.DestinationId = reader.ReadUInt32();
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
                     transition.FadeOutDuration = reader.ReadUInt32();
                     transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
                     transition.FadeOutOffset = reader.ReadInt32();
@@ -840,10 +836,18 @@ namespace WwiseParserLib.Parsers
                 for (var i = 0; i < musicSwitchContainer.TransitionCount; i++)
                 {
                     MusicTransition transition = default;
-                    transition.Unknown_1 = reader.ReadUInt32();
-                    transition.SourceId = reader.ReadUInt32();
-                    transition.Unknown_2 = reader.ReadUInt32();
-                    transition.DestinationId = reader.ReadUInt32();
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
                     transition.FadeOutDuration = reader.ReadUInt32();
                     transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
                     transition.FadeOutOffset = reader.ReadInt32();
@@ -932,10 +936,18 @@ namespace WwiseParserLib.Parsers
                 for (var i = 0; i < musicSwitchContainer.TransitionCount; i++)
                 {
                     MusicTransition transition = default;
-                    transition.Unknown_1 = reader.ReadUInt32();
-                    transition.SourceId = reader.ReadUInt32();
-                    transition.Unknown_2 = reader.ReadUInt32();
-                    transition.DestinationId = reader.ReadUInt32();
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
                     transition.FadeOutDuration = reader.ReadUInt32();
                     transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
                     transition.FadeOutOffset = reader.ReadInt32();
@@ -1219,18 +1231,18 @@ namespace WwiseParserLib.Parsers
                     MusicTrackTimeParameter timeParameter = default;
                     timeParameter.SubTrackIndex = reader.ReadUInt32();
                     timeParameter.AudioId = reader.ReadUInt32();
-                    reader.BaseStream.Position += 4;    // Unknown uint or float
+                    timeParameter.EventId = reader.ReadUInt32();
                     timeParameter.BeginOffset = reader.ReadDouble();
                     timeParameter.BeginTrimOffset = reader.ReadDouble();
                     timeParameter.EndTrimOffset = reader.ReadDouble();
                     timeParameter.EndOffset = reader.ReadDouble();
                     musicTrack.TimeParameters[i] = timeParameter;
                 }
-                musicTrack.SubTrackCount = reader.ReadUInt32();
-                if (musicTrack.SoundCount > 0)
+                if (musicTrack.TimeParameterCount > 0)
                 {
-                    musicTrack.CurveCount = reader.ReadUInt32();
+                    musicTrack.SubTrackCount = reader.ReadUInt32();
                 }
+                musicTrack.CurveCount = reader.ReadUInt32();
                 musicTrack.Curves = new MusicTrackCurve[musicTrack.CurveCount];
                 for (var i = 0; i < musicTrack.CurveCount; i++)
                 {
@@ -1298,6 +1310,24 @@ namespace WwiseParserLib.Parsers
             }
         }
 
+        public static Event ParseEvent2019(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var @event = new Event(data.Length);
+                @event.Id = reader.ReadUInt32();
+                @event.ActionCount = reader.ReadByte();
+                @event.ActionIds = new uint[@event.ActionCount];
+                for (var i = 0; i < @event.ActionCount; i++)
+                {
+                    @event.ActionIds[i] = reader.ReadUInt32();
+                }
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                return @event;
+            }
+        }
+
         public static EventAction ParseEventAction(byte[] data)
         {
             using (var reader = new BinaryReader(new MemoryStream(data)))
@@ -1314,28 +1344,71 @@ namespace WwiseParserLib.Parsers
                 {
                     eventAction.ParameterTypes[i] = (AudioParameterType)reader.ReadByte();
                 }
-                eventAction.ParameterValues = new float[eventAction.ParameterCount];
+                eventAction.ParameterValues = new int[eventAction.ParameterCount];
                 for (var i = 0; i < eventAction.ParameterCount; i++)
                 {
-                    eventAction.ParameterValues[i] = reader.ReadSingle();
+                    eventAction.ParameterValues[i] = reader.ReadInt32();
                 }
-                eventAction.Unknown_08 = reader.ReadByte();
-                EventActionSettings settings;
-                switch (eventAction.ActionType)
+                eventAction.ParameterPairCount = reader.ReadByte();
+                eventAction.ParameterPairTypes = new byte[eventAction.ParameterPairCount];
+                for (var i = 0; i < eventAction.ParameterPairCount; i++)
                 {
-                    case EventActionType.Play:
-                        settings = new EventActionPlaySettings();
-                        ((EventActionPlaySettings)settings).FadeInCurve = (AudioCurveShapeByte)reader.ReadByte();
-                        ((EventActionPlaySettings)settings).ObjectSoundBankId = reader.ReadUInt32();
-                        break;
-
-                    default:
-                        settings = new EventActionUnknownSettings();
-                        ((EventActionUnknownSettings)settings).Blob
-                            = reader.ReadBytes(data.Length - (int)reader.BaseStream.Position);
-                        break;
+                    eventAction.ParameterPairTypes[i] = reader.ReadByte();
                 }
-                eventAction.Settings = settings;
+                eventAction.ParameterPairValues = new AudioParameterPair[eventAction.ParameterPairCount];
+                for (var i = 0; i < eventAction.ParameterPairCount; i++)
+                {
+                    AudioParameterPair audioParameterPair = default;
+                    audioParameterPair.Parameter_1 = reader.ReadSingle();
+                    audioParameterPair.Parameter_2 = reader.ReadSingle();
+                    eventAction.ParameterPairValues[i] = audioParameterPair;
+                }
+
+
+                // Read custom settings
+                if (eventAction.ActionType.HasSettings())
+                {
+                    EventActionSettings settings = null;
+                    switch (eventAction.ActionType)
+                    {
+                        case EventActionType.Stop:
+                            var stop = new EventActionStopSettings();
+                            stop.FadeOutCurve = (AudioCurveShapeByte) reader.ReadByte();
+                            stop.Flag = reader.ReadByte();
+                            reader.ReadEventActionExceptions(stop);
+                            settings = stop;
+                            break;
+                        case EventActionType.Pause:
+                            var pause = new EventActionPauseSettings();
+                            pause.FadeOutCurve = (AudioCurveShapeByte) reader.ReadByte();
+                            reader.ReadEventActionExceptions(pause);
+                            settings = pause;
+                            break;
+                        case EventActionType.Resume:
+                            var resume = new EventActionResumeSettings();
+                            resume.FadeInCurve = (AudioCurveShapeByte) reader.ReadByte();
+                            resume.Flag = reader.ReadByte();
+                            reader.ReadEventActionExceptions(resume);
+                            settings = resume;
+                            break;
+                        case EventActionType.Play:
+                            var play = new EventActionPlaySettings();
+                            play.FadeInCurve = (AudioCurveShapeByte) reader.ReadByte();
+                            play.TargetSoundBankId = reader.ReadUInt32();
+                            settings = play;
+                            break;
+                        case EventActionType.Seek:
+                            var seek = new EventActionSeekSettings();
+                            seek.SeekType = (EventActionSeekType) reader.ReadByte();
+                            seek.Seek = reader.ReadSingle();
+                            seek.Unknown_0 = reader.ReadUInt32();
+                            seek.Unknown_1 = reader.ReadUInt32();
+                            seek.SeekToNearestMarker = reader.ReadBoolean();
+                            settings = seek;
+                            break;
+                    }
+                    eventAction.Settings = settings;
+                }
 
                 // FIXME: we don't fully understand Play EventAction, will trip the assert
                 //Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
@@ -1416,10 +1489,18 @@ namespace WwiseParserLib.Parsers
                 for (var i = 0; i < musicPlaylistContainer.TransitionCount; i++)
                 {
                     MusicTransition transition = default;
-                    transition.Unknown_1 = reader.ReadUInt32();
-                    transition.SourceId = reader.ReadUInt32();
-                    transition.Unknown_2 = reader.ReadUInt32();
-                    transition.DestinationId = reader.ReadUInt32();
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
                     transition.FadeOutDuration = reader.ReadUInt32();
                     transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
                     transition.FadeOutOffset = reader.ReadInt32();
@@ -1495,10 +1576,18 @@ namespace WwiseParserLib.Parsers
                 for (var i = 0; i < musicPlaylistContainer.TransitionCount; i++)
                 {
                     MusicTransition transition = default;
-                    transition.Unknown_1 = reader.ReadUInt32();
-                    transition.SourceId = reader.ReadUInt32();
-                    transition.Unknown_2 = reader.ReadUInt32();
-                    transition.DestinationId = reader.ReadUInt32();
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
                     transition.FadeOutDuration = reader.ReadUInt32();
                     transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
                     transition.FadeOutOffset = reader.ReadInt32();
@@ -1574,10 +1663,18 @@ namespace WwiseParserLib.Parsers
                 for (var i = 0; i < musicPlaylistContainer.TransitionCount; i++)
                 {
                     MusicTransition transition = default;
-                    transition.Unknown_1 = reader.ReadUInt32();
-                    transition.SourceId = reader.ReadUInt32();
-                    transition.Unknown_2 = reader.ReadUInt32();
-                    transition.DestinationId = reader.ReadUInt32();
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
                     transition.FadeOutDuration = reader.ReadUInt32();
                     transition.FadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
                     transition.FadeOutOffset = reader.ReadInt32();
@@ -2329,6 +2426,20 @@ namespace WwiseParserLib.Parsers
             musicPlaylistElement.IsShuffle = reader.ReadBoolean();
 
             return musicPlaylistElement;
+        }
+
+        private static void ReadEventActionExceptions(
+            this BinaryReader reader, EventActionSettingsWithExceptions settings)
+        {
+            settings.ExceptionCount = reader.ReadByte();
+            settings.Exceptions = new EventActionException[settings.ExceptionCount];
+            for (var i = 0; i < settings.ExceptionCount; i++)
+            {
+                EventActionException exception = new EventActionException();
+                exception.Id = reader.ReadUInt32();
+                exception.Unknown = reader.ReadByte();
+                settings.Exceptions[i] = exception;
+            }
         }
     }
 }
