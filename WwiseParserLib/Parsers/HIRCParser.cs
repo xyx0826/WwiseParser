@@ -1648,7 +1648,7 @@ namespace WwiseParserLib.Parsers
                 eventAction.Scope = (EventActionScope)reader.ReadByte();
                 eventAction.ActionType = (EventActionType)reader.ReadByte();
                 eventAction.ObjectId = reader.ReadUInt32();
-                eventAction.Unknown_06 = reader.ReadByte();
+                eventAction.ObjectId2 = reader.ReadByte();
                 eventAction.ParameterCount = reader.ReadByte();
                 eventAction.ParameterTypes = new AudioParameterType[eventAction.ParameterCount];
                 for (var i = 0; i < eventAction.ParameterCount; i++)
@@ -1692,6 +1692,7 @@ namespace WwiseParserLib.Parsers
                         case EventActionType.Pause:
                             var pause = new EventActionPauseSettings();
                             pause.FadeOutCurve = (AudioCurveShapeByte) reader.ReadByte();
+                            pause.Flag = reader.ReadByte();
                             reader.ReadEventActionExceptions(pause);
                             settings = pause;
                             break;
@@ -2030,6 +2031,7 @@ namespace WwiseParserLib.Parsers
             {
                 var musicPlaylistContainer = new MusicPlaylistContainer(data.Length);
                 musicPlaylistContainer.Id = reader.ReadUInt32();
+                if (musicPlaylistContainer.Id == 0x293e1642) Debugger.Break();
                 musicPlaylistContainer.MidiBehavior = (MusicMidiBehavior)reader.ReadByte();
                 musicPlaylistContainer.Properties = reader.ReadAudioProperties2021();
                 musicPlaylistContainer.ChildCount = reader.ReadUInt32();

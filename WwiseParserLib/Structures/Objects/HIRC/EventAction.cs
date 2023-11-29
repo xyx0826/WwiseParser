@@ -16,7 +16,7 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
         public uint ObjectId { get; set; }
 
-        public byte Unknown_06 { get; set; }   // 0, 1 appears in D2BL
+        public byte ObjectId2 { get; set; }   // 0, 1 appears in D2BL
 
         public byte ParameterCount { get; set; }
 
@@ -127,6 +127,8 @@ namespace WwiseParserLib.Structures.Objects.HIRC
 
     public class EventActionPauseSettings : EventActionSettingsWithExceptions
     {
+        public byte Flag { get; set; }
+
         public AudioCurveShapeByte FadeOutCurve { get; set; }
     }
 
