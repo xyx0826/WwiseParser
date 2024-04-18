@@ -2056,7 +2056,7 @@ namespace WwiseParserLib.Parsers
                     stinger.PlayAt = (MusicKeyPointUInt)reader.ReadUInt32();
                     stinger.CueId = reader.ReadUInt32();
                     stinger.DoNotRepeatIn = reader.ReadUInt32();
-                    stinger.AllowPlayingInNextSegment = reader.ReadBoolean();
+                    stinger.AllowPlayingInNextSegment = reader.ReadUInt32() > 0;
                     musicPlaylistContainer.Stingers[i] = stinger;
                 }
                 musicPlaylistContainer.TransitionCount = reader.ReadUInt32();
