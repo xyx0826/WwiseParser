@@ -2031,7 +2031,6 @@ namespace WwiseParserLib.Parsers
             {
                 var musicPlaylistContainer = new MusicPlaylistContainer(data.Length);
                 musicPlaylistContainer.Id = reader.ReadUInt32();
-                if (musicPlaylistContainer.Id == 0x293e1642) Debugger.Break();
                 musicPlaylistContainer.MidiBehavior = (MusicMidiBehavior)reader.ReadByte();
                 musicPlaylistContainer.Properties = reader.ReadAudioProperties2021();
                 musicPlaylistContainer.ChildCount = reader.ReadUInt32();
