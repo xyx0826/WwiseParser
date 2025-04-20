@@ -72,10 +72,15 @@ namespace WwiseParserLib.Structures.SoundBanks
                         // Wwise 2019
                         return HIRCParser.Parse2019(blob, noParse);
                     }
-                    else
+                    else if (bkhd.SoundBankVersion < 0x96)
                     {
                         // Wwise 2021
                         return HIRCParser.Parse2021(blob, noParse);
+                    }
+                    else
+                    {
+                        // Wwise 2023
+                        return HIRCParser.Parse2023(blob, noParse);
                     }
 
                 case SoundBankChunkType.STMG:

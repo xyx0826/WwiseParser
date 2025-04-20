@@ -273,6 +273,54 @@ namespace WwiseParserLib.Parsers
             }
         }
 
+        /// <summary>
+        /// Parses a HIRC chunk from a Wwise 2023 SoundBank.
+        /// Support for Wwise 2023 is incomplete - currently only the Interactive Music Hierarchy is implemented.
+        /// </summary>
+        /// <param name="blob">Chunk data to parse, without the leading type magic.</param>
+        /// <param name="noParse">Whether to only extract blobs and not parse fields.</param>
+        /// <returns>The parsed chunk.</returns>
+        public static SoundBankHierarchyChunk Parse2023(byte[] blob, bool noParse = false)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(blob)))
+            {
+                var hircSection = new SoundBankHierarchyChunk(blob.Length);
+                hircSection.ObjectCount = reader.ReadUInt32();
+                hircSection.Objects = new HIRCObjectBase[hircSection.ObjectCount];
+                var objects = new Dictionary<byte, int>();
+                for (var i = 0; i < hircSection.ObjectCount; i++)
+                {
+                    var objectType = reader.ReadByte();
+                    var objectLength = reader.ReadUInt32();
+                    var objectBlob = reader.ReadBytes((int) objectLength);
+
+                    HIRCObjectBase hircObject;
+
+                    if (noParse)
+                    {
+                        hircObject = ParseUnknown(objectType, objectBlob);
+                    }
+                    else
+                    {
+                        hircObject = (HIRCObjectType) objectType switch
+                        {
+                            HIRCObjectType.Event => ParseEvent2019(objectBlob),
+                            HIRCObjectType.EventAction => ParseEventAction(objectBlob),
+                            HIRCObjectType.MusicSegment => ParseMusicSegment2023(objectBlob),
+                            HIRCObjectType.MusicTrack => ParseMusicTrack2023(objectBlob),
+                            HIRCObjectType.MusicSwitchContainer => ParseMusicSwitchContainer2023(objectBlob),
+                            HIRCObjectType.MusicPlaylistContainer => ParseMusicPlaylistContainer2023(objectBlob),
+                            _ => ParseUnknown(objectType, objectBlob)
+                        };
+                    }
+
+                    hircSection.Objects[i] = hircObject;
+                }
+
+                return hircSection;
+            }
+        }
+
         public static AudioBus ParseAudioBus(byte[] data, bool auxiliary)
         {
             using (var reader = new BinaryReader(new MemoryStream(data)))
@@ -820,6 +868,66 @@ namespace WwiseParserLib.Parsers
             }
         }
 
+        public static MusicSegment ParseMusicSegment2023(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var musicSegment = new MusicSegment(data.Length);
+                musicSegment.Id = reader.ReadUInt32();
+                musicSegment.MidiBehavior = (MusicMidiBehavior) reader.ReadByte();
+                musicSegment.Properties = reader.ReadAudioProperties2023();
+                musicSegment.ChildCount = reader.ReadUInt32();
+                musicSegment.ChildIds = new uint[musicSegment.ChildCount];
+                for (var i = 0; i < musicSegment.ChildCount; i++)
+                {
+                    musicSegment.ChildIds[i] = reader.ReadUInt32();
+                }
+                musicSegment.GridPeriodTime = reader.ReadDouble();
+                musicSegment.GridOffsetTime = reader.ReadDouble();
+                musicSegment.Tempo = reader.ReadSingle();
+                musicSegment.TimeSignatureUpper = reader.ReadByte();
+                musicSegment.TimeSignatureLower = reader.ReadByte();
+                musicSegment.Unknown = reader.ReadByte();
+                musicSegment.StingerCount = reader.ReadUInt32();
+                musicSegment.Stingers = new MusicStinger[musicSegment.StingerCount];
+                for (var i = 0; i < musicSegment.StingerCount; i++)
+                {
+                    MusicStinger stinger = default;
+                    stinger.TriggerId = reader.ReadUInt32();
+                    stinger.SegmentId = reader.ReadUInt32();
+                    stinger.PlayAt = (MusicKeyPointUInt) reader.ReadUInt32();
+                    stinger.CueId = reader.ReadUInt32();
+                    stinger.DoNotRepeatIn = reader.ReadUInt32();
+                    stinger.AllowPlayingInNextSegment = reader.ReadUInt32() == 1;
+                    musicSegment.Stingers[i] = stinger;
+                }
+                musicSegment.EndTrimOffset = reader.ReadDouble();
+                musicSegment.MusicCueCount = reader.ReadUInt32();
+                musicSegment.MusicCues = new MusicCue[musicSegment.MusicCueCount];
+                for (var i = 0; i < musicSegment.MusicCueCount; i++)
+                {
+                    MusicCue musicCue = default;
+                    musicCue.Id = reader.ReadUInt32();
+                    musicCue.Time = reader.ReadDouble();
+                    var customName = new StringBuilder();
+                    var c = reader.ReadByte();
+                    while (c != 0)
+                    {
+                        customName.Append(Convert.ToChar(c));
+                        c = reader.ReadByte();
+                    }
+                    if (customName.Length > 0)
+                    {
+                        musicCue.CustomName = customName.ToString();
+                    }
+                    musicSegment.MusicCues[i] = musicCue;
+                }
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                return musicSegment;
+            }
+        }
+
         public static MusicSwitchContainer ParseMusicSwitchContainer2013(byte[] data)
         {
             using (var reader = new BinaryReader(new MemoryStream(data)))
@@ -1192,6 +1300,106 @@ namespace WwiseParserLib.Parsers
                         transition.TransitionFadeInOffset = reader.ReadInt32();
                         transition.TransitionFadeOutDuration = reader.ReadUInt32();
                         transition.TransitionFadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                        transition.TransitionFadeOutOffset = reader.ReadInt32();
+                        transition.PlayTransitionPreEntry = reader.ReadByte() == 0xFF;
+                        transition.PlayTransitionPostExit = reader.ReadByte() == 0xFF;
+                    }
+                    musicSwitchContainer.Transitions[i] = transition;
+                }
+                musicSwitchContainer.ContinueOnSwitchChange = reader.ReadBoolean();
+                musicSwitchContainer.GroupCount = reader.ReadUInt32();
+                musicSwitchContainer.GroupIds = new uint[musicSwitchContainer.GroupCount];
+                for (var i = 0; i < musicSwitchContainer.GroupCount; i++)
+                {
+                    musicSwitchContainer.GroupIds[i] = reader.ReadUInt32();
+                }
+                musicSwitchContainer.GroupTypes = new bool[musicSwitchContainer.GroupCount];
+                for (var i = 0; i < musicSwitchContainer.GroupCount; i++)
+                {
+                    musicSwitchContainer.GroupTypes[i] = reader.ReadBoolean();
+                }
+                musicSwitchContainer.PathSectionLength = reader.ReadUInt32();
+                musicSwitchContainer.UseWeighted = reader.ReadBoolean();
+                musicSwitchContainer.Paths = reader.ReadPaths(musicSwitchContainer.PathSectionLength, musicSwitchContainer.ChildIds);
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                return musicSwitchContainer;
+            }
+        }
+
+        public static MusicSwitchContainer ParseMusicSwitchContainer2023(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var musicSwitchContainer = new MusicSwitchContainer(data.Length);
+                musicSwitchContainer.Id = reader.ReadUInt32();
+                musicSwitchContainer.MidiBehavior = (MusicMidiBehavior) reader.ReadByte();
+                musicSwitchContainer.Properties = reader.ReadAudioProperties2023();
+                musicSwitchContainer.ChildCount = reader.ReadUInt32();
+                musicSwitchContainer.ChildIds = new uint[musicSwitchContainer.ChildCount];
+                for (var i = 0; i < musicSwitchContainer.ChildCount; i++)
+                {
+                    musicSwitchContainer.ChildIds[i] = reader.ReadUInt32();
+                }
+                musicSwitchContainer.GridPeriodTime = reader.ReadDouble();
+                musicSwitchContainer.GridOffsetTime = reader.ReadDouble();
+                musicSwitchContainer.Tempo = reader.ReadSingle();
+                musicSwitchContainer.TimeSignatureUpper = reader.ReadByte();
+                musicSwitchContainer.TimeSignatureLower = reader.ReadByte();
+                musicSwitchContainer.Unknown_1 = reader.ReadByte();
+                musicSwitchContainer.StingerCount = reader.ReadUInt32();
+                musicSwitchContainer.Stingers = new MusicStinger[musicSwitchContainer.StingerCount];
+                for (var i = 0; i < musicSwitchContainer.StingerCount; i++)
+                {
+                    MusicStinger stinger = default;
+                    stinger.TriggerId = reader.ReadUInt32();
+                    stinger.SegmentId = reader.ReadUInt32();
+                    stinger.PlayAt = (MusicKeyPointUInt) reader.ReadUInt32();
+                    stinger.CueId = reader.ReadUInt32();
+                    stinger.DoNotRepeatIn = reader.ReadUInt32();
+                    stinger.AllowPlayingInNextSegment = reader.ReadUInt32() == 1;
+                    musicSwitchContainer.Stingers[i] = stinger;
+                }
+                musicSwitchContainer.TransitionCount = reader.ReadUInt32();
+                musicSwitchContainer.Transitions = new MusicTransition[musicSwitchContainer.TransitionCount];
+                for (var i = 0; i < musicSwitchContainer.TransitionCount; i++)
+                {
+                    MusicTransition transition = default;
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
+                    transition.FadeOutDuration = reader.ReadUInt32();
+                    transition.FadeOutCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                    transition.FadeOutOffset = reader.ReadInt32();
+                    transition.ExitSourceAt = (MusicKeyPointByte) reader.ReadUInt32();
+                    transition.ExitSourceAtCueId = reader.ReadUInt32();
+                    transition.PlayPostExit = reader.ReadBoolean();
+                    transition.FadeInDuration = reader.ReadUInt32();
+                    transition.FadeInCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                    transition.FadeInOffset = reader.ReadInt32();
+                    transition.CustomCueFilterId = reader.ReadUInt32();
+                    transition.JumpToPlaylistItemId = reader.ReadUInt32();
+                    transition.DestinationSyncTo = (MusicTransitionSyncTarget) reader.ReadUInt32();
+                    transition.PlayPreEntry = reader.ReadBoolean();
+                    transition.MatchSourceCueName = reader.ReadBoolean();
+                    transition.UseTransitionSegment = reader.ReadBoolean();
+                    if (transition.UseTransitionSegment)
+                    {
+                        transition.TransitionSegmentId = reader.ReadUInt32();
+                        transition.TransitionFadeInDuration = reader.ReadUInt32();
+                        transition.TransitionFadeInCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                        transition.TransitionFadeInOffset = reader.ReadInt32();
+                        transition.TransitionFadeOutDuration = reader.ReadUInt32();
+                        transition.TransitionFadeOutCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
                         transition.TransitionFadeOutOffset = reader.ReadInt32();
                         transition.PlayTransitionPreEntry = reader.ReadByte() == 0xFF;
                         transition.PlayTransitionPostExit = reader.ReadByte() == 0xFF;
@@ -1593,6 +1801,96 @@ namespace WwiseParserLib.Parsers
                     switchParameters.ExitSourceAtCueId = reader.ReadUInt32();
                     switchParameters.FadeInDuration = reader.ReadUInt32();
                     switchParameters.FadeInCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                    switchParameters.FadeInOffset = reader.ReadInt32();
+                    musicTrack.SwitchParameters = switchParameters;
+                }
+                musicTrack.LookAheadTime = reader.ReadUInt32();
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                return musicTrack;
+            }
+        }
+
+        public static MusicTrack ParseMusicTrack2023(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var musicTrack = new MusicTrack(data.Length);
+                musicTrack.Id = reader.ReadUInt32();
+                musicTrack.MidiBehavior = (MusicMidiBehavior) reader.ReadByte();
+                musicTrack.SoundCount = reader.ReadUInt32();
+                musicTrack.Sounds = new Sound[musicTrack.SoundCount];
+                for (var i = 0; i < musicTrack.SoundCount; i++)
+                {
+                    var sound = new Sound(0);
+                    sound.Unknown_04 = reader.ReadByte();
+                    sound.Unknown_05 = reader.ReadByte();
+                    sound.Conversion = (SoundConversionType) reader.ReadByte();
+                    sound.Unknown_07 = reader.ReadByte();
+                    sound.Source = (SoundSource) reader.ReadByte();
+                    sound.AudioId = reader.ReadUInt32();
+                    sound.AudioLength = reader.ReadUInt32();
+                    sound.AudioType = (SoundType) reader.ReadByte();
+                    musicTrack.Sounds[i] = sound;
+                }
+                musicTrack.TimeParameterCount = reader.ReadUInt32();
+                musicTrack.TimeParameters = new MusicTrackTimeParameter[musicTrack.TimeParameterCount];
+                for (var i = 0; i < musicTrack.TimeParameterCount; i++)
+                {
+                    MusicTrackTimeParameter timeParameter = default;
+                    timeParameter.SubTrackIndex = reader.ReadUInt32();
+                    timeParameter.AudioId = reader.ReadUInt32();
+                    timeParameter.EventId = reader.ReadUInt32();
+                    timeParameter.BeginOffset = reader.ReadDouble();
+                    timeParameter.BeginTrimOffset = reader.ReadDouble();
+                    timeParameter.EndTrimOffset = reader.ReadDouble();
+                    timeParameter.EndOffset = reader.ReadDouble();
+                    musicTrack.TimeParameters[i] = timeParameter;
+                }
+                if (musicTrack.TimeParameterCount > 0)
+                {
+                    musicTrack.SubTrackCount = reader.ReadUInt32();
+                }
+                musicTrack.CurveCount = reader.ReadUInt32();
+                musicTrack.Curves = new MusicTrackCurve[musicTrack.CurveCount];
+                for (var i = 0; i < musicTrack.CurveCount; i++)
+                {
+                    MusicTrackCurve curve = default;
+                    curve.TimeParameterIndex = reader.ReadUInt32();
+                    curve.Type = (MusicFadeCurveType) reader.ReadUInt32();
+                    curve.PointCount = reader.ReadUInt32();
+                    curve.Points = new MusicCurvePoint[curve.PointCount];
+                    for (var j = 0; j < curve.PointCount; j++)
+                    {
+                        MusicCurvePoint fadePoint = default;
+                        fadePoint.X = reader.ReadSingle();
+                        fadePoint.Y = reader.ReadSingle();
+                        fadePoint.FollowingCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                        curve.Points[j] = fadePoint;
+                    }
+                    musicTrack.Curves[i] = curve;
+                }
+                musicTrack.Properties = reader.ReadAudioProperties2023();
+                musicTrack.TrackType = (MusicTrackType) reader.ReadByte();
+                if (musicTrack.TrackType == MusicTrackType.Switch)
+                {
+                    MusicSwitchParameters switchParameters = default;
+                    switchParameters.Unknown = reader.ReadByte();
+                    switchParameters.GroupId = reader.ReadUInt32();
+                    switchParameters.DefaultSwitchOrStateId = reader.ReadUInt32();
+                    switchParameters.SubTrackCount = reader.ReadUInt32();
+                    switchParameters.AssociatedSwitchOrStateIds = new uint[switchParameters.SubTrackCount];
+                    for (var i = 0; i < switchParameters.SubTrackCount; i++)
+                    {
+                        switchParameters.AssociatedSwitchOrStateIds[i] = reader.ReadUInt32();
+                    }
+                    switchParameters.FadeOutDuration = reader.ReadUInt32();
+                    switchParameters.FadeOutCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                    switchParameters.FadeOutOffset = reader.ReadInt32();
+                    switchParameters.ExitSourceAt = (MusicKeyPointByte) reader.ReadUInt32();
+                    switchParameters.ExitSourceAtCueId = reader.ReadUInt32();
+                    switchParameters.FadeInDuration = reader.ReadUInt32();
+                    switchParameters.FadeInCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
                     switchParameters.FadeInOffset = reader.ReadInt32();
                     musicTrack.SwitchParameters = switchParameters;
                 }
@@ -2099,6 +2397,94 @@ namespace WwiseParserLib.Parsers
                         transition.TransitionFadeInOffset = reader.ReadInt32();
                         transition.TransitionFadeOutDuration = reader.ReadUInt32();
                         transition.TransitionFadeOutCurveShape = (AudioCurveShapeUInt)reader.ReadUInt32();
+                        transition.TransitionFadeOutOffset = reader.ReadInt32();
+                        transition.PlayTransitionPreEntry = reader.ReadBoolean();
+                        transition.PlayTransitionPostExit = reader.ReadBoolean();
+                    }
+                    musicPlaylistContainer.Transitions[i] = transition;
+                }
+                musicPlaylistContainer.PlaylistElementCount = reader.ReadUInt32();
+                musicPlaylistContainer.Playlist = reader.ReadPlaylist();
+
+                Debug.Assert(reader.BaseStream.Position == reader.BaseStream.Length);
+                return musicPlaylistContainer;
+            }
+        }
+
+        public static MusicPlaylistContainer ParseMusicPlaylistContainer2023(byte[] data)
+        {
+            using (var reader = new BinaryReader(new MemoryStream(data)))
+            {
+                var musicPlaylistContainer = new MusicPlaylistContainer(data.Length);
+                musicPlaylistContainer.Id = reader.ReadUInt32();
+                musicPlaylistContainer.MidiBehavior = (MusicMidiBehavior) reader.ReadByte();
+                musicPlaylistContainer.Properties = reader.ReadAudioProperties2023();
+                musicPlaylistContainer.ChildCount = reader.ReadUInt32();
+                musicPlaylistContainer.ChildIds = new uint[musicPlaylistContainer.ChildCount];
+                for (var i = 0; i < musicPlaylistContainer.ChildCount; i++)
+                {
+                    musicPlaylistContainer.ChildIds[i] = reader.ReadUInt32();
+                }
+                musicPlaylistContainer.GridPeriodTime = reader.ReadDouble();
+                musicPlaylistContainer.GridOffsetTime = reader.ReadDouble();
+                musicPlaylistContainer.Tempo = reader.ReadSingle();
+                musicPlaylistContainer.TimeSignatureUpper = reader.ReadByte();
+                musicPlaylistContainer.TimeSignatureLower = reader.ReadByte();
+                musicPlaylistContainer.Unknown_1 = reader.ReadByte();
+                musicPlaylistContainer.StingerCount = reader.ReadUInt32();
+                musicPlaylistContainer.Stingers = new MusicStinger[musicPlaylistContainer.StingerCount];
+                for (var i = 0; i < musicPlaylistContainer.StingerCount; i++)
+                {
+                    MusicStinger stinger = default;
+                    stinger.TriggerId = reader.ReadUInt32();
+                    stinger.SegmentId = reader.ReadUInt32();
+                    stinger.PlayAt = (MusicKeyPointUInt) reader.ReadUInt32();
+                    stinger.CueId = reader.ReadUInt32();
+                    stinger.DoNotRepeatIn = reader.ReadUInt32();
+                    stinger.AllowPlayingInNextSegment = reader.ReadUInt32() > 0;
+                    musicPlaylistContainer.Stingers[i] = stinger;
+                }
+                musicPlaylistContainer.TransitionCount = reader.ReadUInt32();
+                musicPlaylistContainer.Transitions = new MusicTransition[musicPlaylistContainer.TransitionCount];
+                for (var i = 0; i < musicPlaylistContainer.TransitionCount; i++)
+                {
+                    MusicTransition transition = default;
+                    transition.SourceIdCount = reader.ReadUInt32();
+                    transition.SourceIds = new uint[transition.SourceIdCount];
+                    for (var j = 0; j < transition.SourceIdCount; j++)
+                    {
+                        transition.SourceIds[j] = reader.ReadUInt32();
+                    }
+                    transition.DestinationIdCount = reader.ReadUInt32();
+                    transition.DestinationIds = new uint[transition.DestinationIdCount];
+                    for (var j = 0; j < transition.DestinationIdCount; j++)
+                    {
+                        transition.DestinationIds[j] = reader.ReadUInt32();
+                    }
+                    transition.FadeOutDuration = reader.ReadUInt32();
+                    transition.FadeOutCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                    transition.FadeOutOffset = reader.ReadInt32();
+                    transition.ExitSourceAt = (MusicKeyPointByte) reader.ReadUInt32();
+                    transition.ExitSourceAtCueId = reader.ReadUInt32();
+                    transition.PlayPostExit = reader.ReadBoolean();
+                    transition.FadeInDuration = reader.ReadUInt32();
+                    transition.FadeInCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                    transition.FadeInOffset = reader.ReadInt32();
+                    transition.CustomCueFilterId = reader.ReadUInt32();
+                    transition.JumpToPlaylistItemId = reader.ReadUInt32();
+                    // eJumpToType, eEntryType
+                    transition.DestinationSyncTo = (MusicTransitionSyncTarget) reader.ReadUInt32();
+                    transition.PlayPreEntry = reader.ReadBoolean();
+                    transition.MatchSourceCueName = reader.ReadBoolean();
+                    transition.UseTransitionSegment = reader.ReadBoolean();
+                    if (transition.UseTransitionSegment)
+                    {
+                        transition.TransitionSegmentId = reader.ReadUInt32();
+                        transition.TransitionFadeInDuration = reader.ReadUInt32();
+                        transition.TransitionFadeInCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
+                        transition.TransitionFadeInOffset = reader.ReadInt32();
+                        transition.TransitionFadeOutDuration = reader.ReadUInt32();
+                        transition.TransitionFadeOutCurveShape = (AudioCurveShapeUInt) reader.ReadUInt32();
                         transition.TransitionFadeOutOffset = reader.ReadInt32();
                         transition.PlayTransitionPreEntry = reader.ReadBoolean();
                         transition.PlayTransitionPostExit = reader.ReadBoolean();
@@ -2864,6 +3250,237 @@ namespace WwiseParserLib.Parsers
                     rtpcPoint.X = reader.ReadSingle();
                     rtpcPoint.Y = reader.ReadSingle();
                     rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte)reader.ReadByte();
+                    rtpcPoint.Unknown = reader.ReadBytes(3);
+                    rtpc.Points[j] = rtpcPoint;
+                }
+                audioProperties.Rtpcs[i] = rtpc;
+            }
+            return audioProperties;
+        }
+
+        private static AudioProperties ReadAudioProperties2023(this BinaryReader reader)
+        {
+            var audioParameterTypeMapV150 = new Dictionary<byte, AudioParameterType>()
+            {
+                [0x00] = AudioParameterType.VoiceVolume,
+                [0x01] = AudioParameterType.VoicePitch,
+                [0x02] = AudioParameterType.VoiceLowPass,
+                [0x03] = AudioParameterType.VoiceHighPass,
+                [0x04] = AudioParameterType.BusVolume,
+                [0x05] = AudioParameterType.MakeUpGain,
+                [0x06] = AudioParameterType.PlaybackPriority,
+                [0x07] = AudioParameterType.MuteRatio,
+                [0x08] = AudioParameterType.OverrideAuxBus0Volume,
+                [0x09] = AudioParameterType.OverrideAuxBus1Volume,
+                [0x0A] = AudioParameterType.OverrideAuxBus2Volume,
+                [0x0B] = AudioParameterType.OverrideAuxBus3Volume,
+                [0x0C] = AudioParameterType.GameDefinedAuxSendVolume,
+                [0x0D] = AudioParameterType.OverrideBusVolume,
+                [0x0E] = AudioParameterType.OverrideBusHighPassFilter,
+                [0x0F] = AudioParameterType.OverrideBusLowPassFilter,
+                [0x1B] = AudioParameterType.HdrThreshold,
+                [0x1C] = AudioParameterType.HdrRatio,
+                [0x1D] = AudioParameterType.HdrReleaseTime,
+                [0x1E] = AudioParameterType.HdrEnvelopeActiveRange,
+                [0x1F] = AudioParameterType.MidiTransposition_Int,
+                [0x20] = AudioParameterType.MidiVelocityOffset_Int,
+                [0x21] = AudioParameterType.PlaybackSpeed,
+                [0x22] = AudioParameterType.InitialDelay,
+                [0x23] = AudioParameterType.PositioningPannerX,
+                [0x24] = AudioParameterType.PositioningPannerY,
+                [0x29] = AudioParameterType.PositioningCenterPercentage,
+                [0x3A] = AudioParameterType.LoopTime_UInt,
+                [0x3B] = AudioParameterType.Probability,
+                [0x3D] = AudioParameterType.HdrOutputGameParam,
+                [0x3E] = AudioParameterType.HdrOutputGameParamMin,
+                [0x3F] = AudioParameterType.HdrOutputGameParamMax,
+                [0x4D] = AudioParameterType.MidiFiltersKeyRangeMin,
+                [0x4E] = AudioParameterType.MidiFiltersKeyRangeMax,
+                [0x4F] = AudioParameterType.MidiFiltersVelocityRangeMin,
+                [0x50] = AudioParameterType.MidiFiltersVelocityRangeMax,
+            };
+
+            var audioProperties = new AudioProperties();
+            audioProperties.OverrideEffects = reader.ReadBoolean();
+            audioProperties.EffectCount = reader.ReadByte();
+            if (audioProperties.EffectCount > 0)
+            {
+                audioProperties.BypassedEffects = (AudioBypassedEffects) reader.ReadByte();
+            }
+            audioProperties.Effects = new AudioEffect[audioProperties.EffectCount];
+            for (var i = 0; i < audioProperties.EffectCount; i++)
+            {
+                AudioEffect effect = default;
+                effect.Index = reader.ReadByte();
+                effect.Id = reader.ReadUInt32();
+                effect.ShouldUseShareSets = reader.ReadBoolean();
+                effect.IsRendered = reader.ReadBoolean();
+                audioProperties.Effects[i] = effect;
+            }
+            // Wwise 2021: u8 uNumFx
+            // Wwise 2021: u8 bOverrideAttachmentParams
+            reader.BaseStream.Position += 2;
+            audioProperties.OutputBusId = reader.ReadUInt32();
+            audioProperties.ParentId = reader.ReadUInt32();
+            audioProperties.PlaybackBehavior = (AudioPlaybackBehavior) reader.ReadByte();
+            audioProperties.ParameterCount = reader.ReadByte();
+            audioProperties.ParameterTypes = new AudioParameterType[audioProperties.ParameterCount];
+            for (var i = 0; i < audioProperties.ParameterCount; i++)
+            {
+                var rawParameterType = reader.ReadByte();
+                if (audioParameterTypeMapV150.TryGetValue(rawParameterType, out var parameterType))
+                {
+                    audioProperties.ParameterTypes[i] = parameterType;
+                }
+                else
+                {
+                    audioProperties.ParameterTypes[i] = (AudioParameterType) rawParameterType;
+                }
+            }
+            audioProperties.ParameterValues = new ValueType[audioProperties.ParameterCount];
+            for (var i = 0; i < audioProperties.ParameterCount; i++)
+            {
+                var parameterType = audioProperties.ParameterTypes[i].ToString();
+                if (parameterType.EndsWith("_UInt"))
+                {
+                    audioProperties.ParameterValues[i] = reader.ReadUInt32();
+                }
+                else if (parameterType.EndsWith("_Int"))
+                {
+                    audioProperties.ParameterValues[i] = reader.ReadInt32();
+                }
+                else
+                {
+                    audioProperties.ParameterValues[i] = reader.ReadSingle();
+                }
+            }
+            audioProperties.ParameterPairCount = reader.ReadByte();
+            audioProperties.ParameterPairTypes = new byte[audioProperties.ParameterPairCount];
+            for (var i = 0; i < audioProperties.ParameterPairCount; i++)
+            {
+                audioProperties.ParameterPairTypes[i] = reader.ReadByte();
+            }
+            audioProperties.ParameterPairValues = new AudioParameterPair[audioProperties.ParameterPairCount];
+            for (var i = 0; i < audioProperties.ParameterPairCount; i++)
+            {
+                AudioParameterPair audioParameterPair = default;
+                audioParameterPair.Parameter_1 = reader.ReadSingle();
+                audioParameterPair.Parameter_2 = reader.ReadSingle();
+                audioProperties.ParameterPairValues[i] = audioParameterPair;
+            }
+            audioProperties.Positioning = (AudioPositioningBehavior) reader.ReadByte();
+            if (audioProperties.Positioning.HasFlag(AudioPositioningBehavior.TwoDimensional))
+            {
+                //// ListenerRelativeRoutingBehavior
+                //00000001 3DSpatializationPosition
+                //00000010 3DSpatializationPositionAndOrientation
+                //00001000 EnableAttenuation
+                //00010000 HoldEmitterPositionAndOrientation
+                //00100000 HoldListenerOrientation
+                //01000000 ShouldLoop
+                //10000000 EnableDiffraction
+                reader.BaseStream.Position++;
+            }
+            if (audioProperties.Positioning.HasFlag(AudioPositioningBehavior.UpdateAtEachFrame)
+                || audioProperties.Positioning.HasFlag(AudioPositioningBehavior.UserDefinedShouldLoop))
+            {
+                // 3DPositionListenerWithAutomation or 3DPositionEmitterWithAutomation
+                audioProperties.IsGameDefined = reader.ReadBoolean();
+                audioProperties.AttenuationId = reader.ReadUInt32();
+                if (!audioProperties.IsGameDefined)
+                {
+                    audioProperties.UserDefinedPlaySettings = (AudioUserDefinedPositioningBehavior) reader.ReadByte();
+                    audioProperties.TransitionTime = reader.ReadUInt32();
+                    audioProperties.ControlPointKeyCount = reader.ReadUInt32();
+                    audioProperties.ControlPointKeys = new AudioControlPointKey[audioProperties.ControlPointKeyCount];
+                    for (var i = 0; i < audioProperties.ControlPointKeyCount; i++)
+                    {
+                        AudioControlPointKey controlPointKey = default;
+                        controlPointKey.X = reader.ReadSingle();
+                        controlPointKey.Z = reader.ReadSingle();
+                        controlPointKey.Y = reader.ReadSingle();
+                        controlPointKey.Timestamp = reader.ReadUInt32();
+                        audioProperties.ControlPointKeys[i] = controlPointKey;
+                    }
+                    audioProperties.RandomRangeCount = reader.ReadUInt32();
+                    audioProperties.RandomRangeUnknowns = new AudioPathRandomUnknown[audioProperties.RandomRangeCount];
+                    for (var i = 0; i < audioProperties.RandomRangeCount; i++)
+                    {
+                        AudioPathRandomUnknown randomRangeUnknown = default;
+                        randomRangeUnknown.Unknown_0 = reader.ReadUInt32();
+                        randomRangeUnknown.Unknown_4 = reader.ReadUInt32();
+                        audioProperties.RandomRangeUnknowns[i] = randomRangeUnknown;
+                    }
+                    audioProperties.RandomRanges = new AudioPathRandomRange[audioProperties.RandomRangeCount];
+                    for (var i = 0; i < audioProperties.RandomRangeCount; i++)
+                    {
+                        AudioPathRandomRange randomRange = default;
+                        randomRange.LeftRight = reader.ReadSingle();
+                        randomRange.FrontBack = reader.ReadSingle();
+                        randomRange.UpDown = reader.ReadSingle();
+                        audioProperties.RandomRanges[i] = randomRange;
+                    }
+                }
+            }
+            audioProperties.AuxSendsBehavior = (AudioAuxSendsBehavior) reader.ReadByte();
+            if (audioProperties.AuxSendsBehavior.HasFlag(AudioAuxSendsBehavior.OverrideAuxSends))
+            {
+                audioProperties.AuxiliarySendBusIds = new uint[4];
+                audioProperties.AuxiliarySendBusIds[0] = reader.ReadUInt32();
+                audioProperties.AuxiliarySendBusIds[1] = reader.ReadUInt32();
+                audioProperties.AuxiliarySendBusIds[2] = reader.ReadUInt32();
+                audioProperties.AuxiliarySendBusIds[3] = reader.ReadUInt32();
+            }
+            reader.BaseStream.Position += 4;    // reflectionsAuxBus
+            audioProperties.LimitBehavior = (AudioLimitBehavior) reader.ReadByte();
+            audioProperties.VirtualVoiceReturnBehavior = (AudioVirtualVoiceReturnBehavior) reader.ReadByte();
+            audioProperties.LimitSoundInstancesTo = reader.ReadUInt16();
+            audioProperties.VirtualVoiceBehavior = (AudioVirtualVoiceBehavior) reader.ReadByte();
+            audioProperties.HdrSettings = (AudioHdrSettings) reader.ReadByte();
+            var statePropertyCount = reader.ReadByte();
+            for (int i = 0; i < statePropertyCount; i++)
+            {
+                reader.BaseStream.Position += 3;    // 3 unknown bytes
+            }
+            audioProperties.StateGroupCount = reader.ReadByte();
+            audioProperties.StateGroups = new AudioStateGroup[audioProperties.StateGroupCount];
+            for (var i = 0; i < audioProperties.StateGroupCount; i++)
+            {
+                var stateGroup = new AudioStateGroup();
+                stateGroup.Id = reader.ReadUInt32();
+                stateGroup.MusicChangeAt = (MusicKeyPointByte) reader.ReadByte();
+                stateGroup.StateWithSettingsCount = reader.ReadByte();
+                stateGroup.StatesWithSettings = new AudioStateWithSettings[stateGroup.StateWithSettingsCount];
+                for (var j = 0; j < stateGroup.StateWithSettingsCount; j++)
+                {
+                    AudioStateWithSettings AudioStateWithSettings = default;
+                    AudioStateWithSettings.StateId = reader.ReadUInt32();
+                    var stateSettingsCount = reader.ReadUInt16();
+                    // Omit entire PropBundle with u16 types and u32 values
+                    reader.BaseStream.Position += stateSettingsCount * (2 + 4);
+                    stateGroup.StatesWithSettings[j] = AudioStateWithSettings;
+                }
+                audioProperties.StateGroups[i] = stateGroup;
+            }
+            audioProperties.RtpcCount = reader.ReadUInt16();
+            audioProperties.Rtpcs = new AudioRtpc[audioProperties.RtpcCount];
+            for (var i = 0; i < audioProperties.RtpcCount; i++)
+            {
+                var rtpc = new AudioRtpc();
+                rtpc.X = reader.ReadUInt32();
+                rtpc.IsMidi = reader.ReadBoolean();
+                rtpc.IsGeneralSettings = reader.ReadBoolean();
+                rtpc.Parameter = (RtpcParameterType) reader.ReadByte();
+                rtpc.UnknownId = reader.ReadUInt32();
+                rtpc.CurveScalingType = (RtpcCurveType) reader.ReadByte();
+                rtpc.PointCount = reader.ReadUInt16();
+                rtpc.Points = new RtpcPoint[rtpc.PointCount];
+                for (var j = 0; j < rtpc.PointCount; j++)
+                {
+                    RtpcPoint rtpcPoint = new RtpcPoint();
+                    rtpcPoint.X = reader.ReadSingle();
+                    rtpcPoint.Y = reader.ReadSingle();
+                    rtpcPoint.FollowingCurveShape = (AudioCurveShapeByte) reader.ReadByte();
                     rtpcPoint.Unknown = reader.ReadBytes(3);
                     rtpc.Points[j] = rtpcPoint;
                 }

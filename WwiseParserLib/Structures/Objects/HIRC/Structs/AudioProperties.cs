@@ -381,7 +381,11 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         PlaybackSpeed = 0x36,
         MidiClipTempoSourceIsFile,
         LoopTime_UInt = 0x3A,
-        InitialDelay
+        InitialDelay,
+
+        // Extra parameter types from wwiser
+
+        MuteRatio,
     }
 
     public struct AudioParameterPair
