@@ -227,6 +227,14 @@ namespace WwiseParserLib.Structures.Objects.HIRC.Structs
         All = 0b_0001_0000
     }
 
+    [Flags]
+    public enum AudioEffectFlags : byte
+    {
+        Bypass = 0b_0000_0001,
+        ShouldUseShareSets = 0b_0000_0010,
+        IsRendered = 0b_0000_0100
+    }
+
     public struct AudioEffect
     {
         /// <summary>
