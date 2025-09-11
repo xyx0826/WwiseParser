@@ -3313,8 +3313,9 @@ namespace WwiseParserLib.Parsers
                 AudioEffect effect = default;
                 effect.Index = reader.ReadByte();
                 effect.Id = reader.ReadUInt32();
-                effect.ShouldUseShareSets = reader.ReadBoolean();
-                effect.IsRendered = reader.ReadBoolean();
+                AudioEffectFlags flags = (AudioEffectFlags) reader.ReadByte();
+                effect.ShouldUseShareSets = flags.HasFlag(AudioEffectFlags.ShouldUseShareSets);
+                effect.IsRendered = flags.HasFlag(AudioEffectFlags.IsRendered);
                 audioProperties.Effects[i] = effect;
             }
             // Wwise 2021: u8 uNumFx
