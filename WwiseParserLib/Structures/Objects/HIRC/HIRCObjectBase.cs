@@ -34,6 +34,11 @@ namespace WwiseParserLib.Structures.Objects.HIRC
         /// </summary>
         public uint Id { get; set; }
 
+        /// <summary>
+        /// The ID of the object's SoundBank.
+        /// </summary>
+        public uint FromBankId { get; set; }
+
         public override bool Equals(object obj)
         {
             return obj is HIRCObjectBase @base &&

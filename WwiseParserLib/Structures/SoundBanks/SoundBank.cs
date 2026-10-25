@@ -49,39 +49,46 @@ namespace WwiseParserLib.Structures.SoundBanks
                     return BKHDParser.Parse(blob);
 
                 case SoundBankChunkType.HIRC:
-                    // Wwise 2016 or 2013?
                     var bkhd = GetChunk(SoundBankChunkType.BKHD) as SoundBankHeaderChunk;
                     if (bkhd == null)
                     {
                         throw new InvalidOperationException("Unable to parse the HIRC chunk;" +
                             "could not find the BKHD chunk to determine SoundBank version.");
                     }
-                    // TODO: refactor magic - Wwise 2016 SoundBank version
+
+                    SoundBankHierarchyChunk hirc;
                     if (bkhd.SoundBankVersion == 0x71)
                     {
                         // Wwise 2016
-                        return HIRCParser.Parse(blob, noParse);
+                        hirc = HIRCParser.Parse(blob, noParse);
                     }
                     else if (bkhd.SoundBankVersion < 0x71)
                     {
                         // Wwise 2013
-                        return HIRCParser.Parse2013(blob, noParse);
+                        hirc = HIRCParser.Parse2013(blob, noParse);
                     }
                     else if (bkhd.SoundBankVersion < 0x8c)
                     {
                         // Wwise 2019
-                        return HIRCParser.Parse2019(blob, noParse);
+                        hirc = HIRCParser.Parse2019(blob, noParse);
                     }
                     else if (bkhd.SoundBankVersion < 0x96)
                     {
                         // Wwise 2021
-                        return HIRCParser.Parse2021(blob, noParse);
+                        hirc = HIRCParser.Parse2021(blob, noParse);
                     }
                     else
                     {
                         // Wwise 2023
-                        return HIRCParser.Parse2023(blob, noParse);
+                        hirc = HIRCParser.Parse2023(blob, noParse);
                     }
+
+                    foreach (var obj in hirc.Objects)
+                    {
+                        obj.FromBankId = bkhd.SoundBankId;
+                    }
+
+                    return hirc;
 
                 case SoundBankChunkType.STMG:
                     return STMGParser.Parse(blob);
